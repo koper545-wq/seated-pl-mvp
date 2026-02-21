@@ -117,6 +117,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           }
         } catch (error) {
           console.error("OAuth signIn error:", error);
+          console.error("OAuth signIn error details:", JSON.stringify(error, Object.getOwnPropertyNames(error as object)));
           return false;
         }
       }
