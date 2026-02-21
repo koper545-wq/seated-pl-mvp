@@ -7,7 +7,8 @@ import { routing } from "@/i18n/routing";
 import "../globals.css";
 import { Header, Footer } from "@/components/layout";
 import { SessionProvider } from "@/components/providers";
-import { DevAccountSwitcher, MVPModeSwitcher } from "@/components/dev";
+// Dev tools disabled in MVP production
+// import { DevAccountSwitcher, MVPModeSwitcher } from "@/components/dev";
 import { EventsProvider } from "@/contexts/events-context";
 import { MVPModeProvider } from "@/contexts/mvp-mode-context";
 import { BookingsProvider } from "@/contexts/bookings-context";
@@ -96,8 +97,7 @@ export default async function LocaleLayout({
                     <main className="flex-1">{children}</main>
                     <Footer />
                   </div>
-                  <DevAccountSwitcher />
-                  <MVPModeSwitcher />
+                  {/* Dev tools disabled in MVP */}
                 </BookingsProvider>
               </EventsProvider>
             </MVPModeProvider>
