@@ -1,0 +1,1395 @@
+{
+  "common": {
+    "appName": "Seated",
+    "tagline": "Culinary experiences in Wrocław"
+  },
+  "nav": {
+    "events": "Events",
+    "howItWorks": "How it works",
+    "becomeHost": "Become a host",
+    "faq": "FAQ",
+    "login": "Log in",
+    "register": "Join",
+    "logout": "Log out",
+    "myAccount": "My account",
+    "profile": "Profile",
+    "myBookings": "My bookings",
+    "homies": "Homies",
+    "wishlist": "Wishlist",
+    "settings": "Settings",
+    "dashboard": "Dashboard",
+    "hostPanel": "Host panel",
+    "adminPanel": "Admin panel",
+    "giftCards": "Gift Cards"
+  },
+  "footer": {
+    "platform": "Platform",
+    "info": "Information",
+    "followUs": "Follow us",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "contact": "Contact",
+    "rewards": "XP & Rewards",
+    "copyright": "© {year} Seated. All rights reserved.",
+    "madeWith": "Made with ❤️ in Wrocław"
+  },
+  "home": {
+    "hero": {
+      "badge": "Wrocław",
+      "title": "Discover unique",
+      "titleHighlight": "culinary experiences",
+      "subtitle": "Supper clubs, pop-ups, cooking workshops and more. Join the food lovers community and experience unforgettable moments at the table.",
+      "cta": "Browse events",
+      "ctaSecondary": "Become a host",
+      "stats": "Already {count}+ people discovered new flavors in Wrocław"
+    },
+    "categories": {
+      "title": "Choose your adventure",
+      "subtitle": "From intimate dinners to active meetups - find something for yourself",
+      "supperClub": "Supper Club",
+      "supperClubDesc": "Intimate home dinners",
+      "chefsTable": "Chef's Table",
+      "chefsTableDesc": "Exclusive menus from top chefs",
+      "popup": "Pop-up",
+      "popupDesc": "Temporary restaurants",
+      "workshops": "Workshops",
+      "workshopsDesc": "Learn to cook",
+      "tastings": "Tastings",
+      "tastingsDesc": "Wines, beers, whisky",
+      "activeFood": "Active + Food",
+      "activeFoodDesc": "Sports and food",
+      "farmExperience": "Farm Experience",
+      "farmExperienceDesc": "From field to table"
+    },
+    "featured": {
+      "title": "Upcoming events",
+      "subtitle": "Book your spot before they sell out",
+      "viewAll": "View all"
+    },
+    "benefits": {
+      "title": "Why Seated?",
+      "subtitle": "We create a safe space for culinary explorers",
+      "verified": {
+        "title": "Verified hosts",
+        "description": "Every host goes through verification. We check venues and skills."
+      },
+      "secure": {
+        "title": "Secure payments",
+        "description": "Pay through the platform. Full refund if the event is cancelled."
+      },
+      "transparent": {
+        "title": "Transparent prices",
+        "description": "You know exactly what you're paying for. No hidden fees or surprises."
+      }
+    },
+    "howItWorks": {
+      "title": "How it works?",
+      "subtitle": "Three simple steps to a culinary adventure",
+      "step1": {
+        "title": "Find an event",
+        "description": "Browse culinary experiences in your city. Filter by type, date and price."
+      },
+      "step2": {
+        "title": "Book your spot",
+        "description": "Securely pay for your reservation online. You'll receive the full address in confirmation."
+      },
+      "step3": {
+        "title": "Enjoy!",
+        "description": "Meet new people, discover new flavors and experience unforgettable moments at the table."
+      }
+    },
+    "testimonials": {
+      "title": "What guests say",
+      "subtitle": "Real reviews from real food lovers",
+      "items": [
+        {
+          "name": "Kasia M.",
+          "text": "Amazing experience! Dinner at Anna's was like visiting a friend who turned out to be a master chef.",
+          "event": "Italian Dinner"
+        },
+        {
+          "name": "Tomek W.",
+          "text": "The sushi workshop opened my eyes to how much there is to learn. I'll be back for more!",
+          "event": "Sushi Masterclass"
+        },
+        {
+          "name": "Anna K.",
+          "text": "The wine tasting was led by a true enthusiast. I learned stories I won't find in any store.",
+          "event": "Natural Wines"
+        }
+      ]
+    },
+    "cta": {
+      "title": "Have culinary talent? Share it!",
+      "subtitle": "Become a host and start organizing your own culinary events. We'll help you get started - from planning to promotion.",
+      "button": "Become a host",
+      "learnMore": "Learn more",
+      "stats": "Join {count}+ hosts in Wrocław"
+    },
+    "upcomingEvents": "Upcoming events",
+    "viewAll": "View all",
+    "becomeHost": {
+      "title": "Share your passion",
+      "subtitle": "Become a host and earn doing what you love",
+      "benefit1": "Set your own prices and schedule",
+      "benefit2": "Meet food enthusiasts",
+      "benefit3": "Join the community",
+      "cta": "Learn more"
+    },
+    "stats": {
+      "events": "events",
+      "guests": "happy guests",
+      "hosts": "active hosts",
+      "rating": "average rating"
+    }
+  },
+  "events": {
+    "title": "Events",
+    "subtitle": "culinary experiences await you",
+    "search": "Search events, hosts...",
+    "filters": "Filters",
+    "sort": "Sort",
+    "sortOptions": {
+      "dateAsc": "Date (soonest)",
+      "dateDesc": "Date (latest)",
+      "priceAsc": "Price (low to high)",
+      "priceDesc": "Price (high to low)",
+      "ratingDesc": "Rating (highest)"
+    },
+    "filterLabels": {
+      "eventType": "Event type",
+      "location": "Location",
+      "priceRange": "Price range",
+      "date": "Date",
+      "budget": "Budget",
+      "groupSize": "Group size",
+      "language": "Event language",
+      "experienceLevel": "Experience level",
+      "accessibility": "Accessibility"
+    },
+    "advancedFilters": "Advanced filters",
+    "groupSizeOptions": {
+      "all": "Any size",
+      "intimate": "Intimate (2-6 people)",
+      "small": "Small (7-12 people)",
+      "medium": "Medium (13-20 people)",
+      "large": "Large (21+ people)"
+    },
+    "languageOptions": {
+      "all": "Any language",
+      "pl": "Polish",
+      "en": "English",
+      "es": "Spanish",
+      "ja": "Japanese"
+    },
+    "experienceLevels": {
+      "all": "All levels",
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced"
+    },
+    "accessibilityOptions": {
+      "wheelchairAccessible": "Wheelchair accessible",
+      "noStairs": "No stairs",
+      "serviceAnimalsAllowed": "Service animals allowed",
+      "hearingAssistance": "Hearing assistance"
+    },
+    "mapView": "Map",
+    "listView": "List",
+    "activeFilters": "Active:",
+    "clearFilters": "Clear filters",
+    "clearAll": "Clear all",
+    "applyFilters": "Apply filters",
+    "found": "Found {count} events",
+    "noResults": "No events found",
+    "noResultsHint": "Try changing filters or search for a different keyword",
+    "soldOut": "Sold out",
+    "spotsLeft": "{count} spots",
+    "perPerson": "pp"
+  },
+  "eventDetails": {
+    "bookNow": "Book now",
+    "soldOut": "Sold out",
+    "joinWaitlist": "Join waitlist",
+    "spotsLeft": "{count} spots left",
+    "duration": "Duration",
+    "location": "Location",
+    "price": "Price per person",
+    "menu": "Menu",
+    "dietaryOptions": "Dietary options",
+    "whatToBring": "What to bring",
+    "aboutHost": "About the host",
+    "hostEvents": "{count} events",
+    "hostRating": "{rating} ({count} reviews)",
+    "viewProfile": "View profile",
+    "follow": "Follow",
+    "qa": {
+      "title": "Questions & Answers",
+      "askQuestion": "Ask a question",
+      "placeholder": "Your question...",
+      "submit": "Submit",
+      "noQuestions": "No questions yet. Be the first!"
+    },
+    "similarEvents": "Similar events"
+  },
+  "booking": {
+    "title": "Booking",
+    "steps": {
+      "seats": "Seats",
+      "details": "Details",
+      "payment": "Payment",
+      "confirmation": "Confirmation"
+    },
+    "selectSeats": "Select number of seats",
+    "tickets": "Number of tickets",
+    "availableSpots": "Available spots: {count}",
+    "yourDetails": "Your details",
+    "fullName": "Full name",
+    "email": "Email address",
+    "phone": "Phone number",
+    "dietaryPreferences": "Dietary preferences",
+    "specialRequests": "Special requests",
+    "specialRequestsPlaceholder": "Allergies, birthdays, etc.",
+    "summary": "Summary",
+    "subtotal": "Subtotal",
+    "serviceFee": "Service fee ({percent}%)",
+    "total": "Total",
+    "terms": "I accept the {terms} and {privacy}",
+    "termsLink": "terms of service",
+    "privacyLink": "privacy policy",
+    "confirmBooking": "Confirm booking",
+    "processing": "Processing...",
+    "success": {
+      "title": "Booking confirmed!",
+      "subtitle": "Thank you for your booking",
+      "details": "Booking details have been sent to {email}",
+      "whatNext": "What's next?",
+      "step1": "The host will confirm your booking within 24h",
+      "step2": "You'll receive the full address 24h before the event",
+      "step3": "Enjoy a unique experience!",
+      "viewBookings": "My bookings",
+      "backToEvents": "Back to events"
+    }
+  },
+  "auth": {
+    "continueWithGoogle": "Continue with Google",
+    "continueWithFacebook": "Continue with Facebook",
+    "orDivider": "or",
+    "login": {
+      "title": "Welcome back!",
+      "subtitle": "Log in to continue your culinary adventure",
+      "email": "Email address",
+      "password": "Password",
+      "forgotPassword": "Forgot password?",
+      "submit": "Log in",
+      "submitting": "Logging in...",
+      "noAccount": "Don't have an account?",
+      "register": "Sign up",
+      "accountCreated": "Account created. You can now log in.",
+      "errors": {
+        "invalid": "Invalid email or password",
+        "generic": "An error occurred while logging in"
+      }
+    },
+    "register": {
+      "title": "Join Seated",
+      "subtitle": "Create an account and discover culinary experiences",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email address",
+      "password": "Password",
+      "confirmPassword": "Confirm password",
+      "terms": "I accept the {terms} and {privacy}",
+      "submit": "Sign up",
+      "submitting": "Signing up...",
+      "hasAccount": "Already have an account?",
+      "login": "Log in",
+      "errors": {
+        "passwordMismatch": "Passwords don't match",
+        "emailExists": "This email is already registered",
+        "generic": "An error occurred while signing up"
+      }
+    },
+    "forgotPassword": {
+      "title": "Reset password",
+      "subtitle": "Enter the email address associated with your account",
+      "email": "Email address",
+      "submit": "Send reset link",
+      "submitting": "Sending...",
+      "backToLogin": "Back to login",
+      "success": {
+        "title": "Check your inbox",
+        "subtitle": "We've sent a password reset link to {email}",
+        "hint": "If you don't see the email, check your spam folder."
+      }
+    }
+  },
+  "dashboard": {
+    "guest": {
+      "title": "Dashboard",
+      "welcome": "Welcome, {name}!",
+      "stats": {
+        "eventsAttended": "Attended",
+        "upcomingEvents": "Upcoming",
+        "reviewsGiven": "Reviews"
+      },
+      "upcomingBookings": "Upcoming bookings",
+      "noUpcoming": "No upcoming bookings",
+      "browseEvents": "Browse events",
+      "recentActivity": "Recent activity",
+      "badges": "Your badges"
+    },
+    "host": {
+      "title": "Host panel",
+      "welcome": "Welcome, {name}!",
+      "stats": {
+        "totalEvents": "Events",
+        "totalGuests": "Guests",
+        "revenue": "Revenue",
+        "rating": "Rating"
+      },
+      "upcomingEvents": "Upcoming events",
+      "createEvent": "Create event",
+      "pendingBookings": "Pending bookings",
+      "recentReviews": "Recent reviews",
+      "events": {
+        "duplicate": "Duplicate",
+        "duplicateEvent": "Duplicate event",
+        "duplicating": "Creating a copy of the event",
+        "duplicateSelectDate": "Select a new date",
+        "moreActions": "More",
+        "preview": "Preview",
+        "guests": "Guests",
+        "edit": "Edit"
+      },
+      "recurring": {
+        "title": "Recurring event",
+        "pattern": "Frequency",
+        "weekly": "Weekly",
+        "biweekly": "Every 2 weeks",
+        "monthly": "Monthly",
+        "endBy": "End series",
+        "endByOccurrences": "After number of events",
+        "endByDate": "On date",
+        "occurrences": "Number of events",
+        "preview": "Preview dates",
+        "andMore": "... and {count} more",
+        "created": "Created {count} events!"
+      }
+    },
+    "bookings": {
+      "title": "My bookings",
+      "upcoming": "Upcoming",
+      "past": "History",
+      "cancelled": "Cancelled",
+      "noBookings": "No bookings",
+      "viewDetails": "Details",
+      "cancel": "Cancel",
+      "cancelConfirm": "Are you sure you want to cancel this booking?"
+    },
+    "settings": {
+      "title": "Settings",
+      "profile": "Profile",
+      "notifications": "Notifications",
+      "privacy": "Privacy",
+      "language": "Language",
+      "save": "Save changes",
+      "saved": "Saved!"
+    }
+  },
+  "becomeHost": {
+    "title": "Become a host",
+    "subtitle": "Share your passion for cooking",
+    "steps": {
+      "type": "Type",
+      "details": "Details",
+      "experience": "Experience",
+      "location": "Location",
+      "photos": "Photos",
+      "review": "Review"
+    },
+    "hostType": {
+      "title": "Who are you?",
+      "individual": "Individual",
+      "individualDesc": "I cook as a hobby at home",
+      "restaurant": "Restaurant / Business",
+      "restaurantDesc": "I represent a food establishment"
+    },
+    "success": {
+      "title": "Thank you for applying!",
+      "subtitle": "Your application has been submitted",
+      "nextSteps": "What's next?",
+      "step1": "Our team will review your application within 48h",
+      "step2": "We'll contact you via email",
+      "step3": "Once approved, you can start creating events"
+    }
+  },
+  "becomeHostPage": {
+    "header": {
+      "title": "Become a Seated host",
+      "subtitle": "Share your passion for cooking and earn by organizing unique culinary events"
+    },
+    "progress": {
+      "data": "Data",
+      "address": "Address",
+      "experience": "Experience",
+      "photos": "Photos",
+      "schedule": "Schedule"
+    },
+    "hostType": {
+      "title": "Who are you?",
+      "subtitle": "Choose the type of host account",
+      "individual": "Individual",
+      "individualDesc": "Cook at home, organize dinners, workshops",
+      "restaurant": "Restaurant / Company",
+      "restaurantDesc": "Pop-ups, tastings, special events"
+    },
+    "personalInfo": {
+      "title": "Personal information",
+      "subtitle": "Basic information about you",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email address",
+      "phone": "Phone number",
+      "birthDate": "Date of birth",
+      "birthDateHint": "You must be at least 18 years old"
+    },
+    "restaurantInfo": {
+      "title": "Restaurant information",
+      "subtitle": "Information about your food business",
+      "name": "Restaurant / company name",
+      "nip": "Tax ID (optional)",
+      "website": "Website / Instagram",
+      "contactPerson": "Contact person",
+      "contactName": "Full name",
+      "contactEmail": "Contact email",
+      "contactPhone": "Phone",
+      "contactPosition": "Position (optional)",
+      "contactPositionPlaceholder": "e.g. Manager, Owner"
+    },
+    "address": {
+      "title": "Address",
+      "subtitle": "Where will you organize events? (This address will not be public)",
+      "street": "Street and number",
+      "apartment": "Apartment number (optional)",
+      "postalCode": "Postal code",
+      "city": "City",
+      "neighborhood": "Neighborhood",
+      "neighborhoodPlaceholder": "Select neighborhood",
+      "neighborhoods": {
+        "stare-miasto": "Old Town",
+        "nadodrze": "Nadodrze",
+        "srodmiescie": "City Center",
+        "krzyki": "Krzyki",
+        "fabryczna": "Fabryczna",
+        "psie-pole": "Psie Pole",
+        "biskupin": "Biskupin",
+        "olbin": "Ołbin",
+        "other": "Other"
+      },
+      "notice": "Note: The full address will only be shared with guests with confirmed reservations, 24h before the event."
+    },
+    "experience": {
+      "title": "Experience and cuisine",
+      "subtitle": "Tell us about your culinary skills",
+      "hasExperience": "Have you ever organized a supper club or similar event?",
+      "experienceYes": "Yes, I have experience",
+      "experienceNo": "No, this will be my first time",
+      "experiencePro": "I am a professional chef/pastry chef",
+      "experienceDetails": "Tell us more about your experience",
+      "experienceDetailsPlaceholder": "Where have you organized events? How many people have you hosted? What were the reactions?",
+      "cuisines": "What cuisines will you serve? (select at least 1)",
+      "cuisineTypes": {
+        "polish": "Polish",
+        "italian": "Italian",
+        "french": "French",
+        "asian": "Asian",
+        "japanese": "Japanese",
+        "indian": "Indian",
+        "mexican": "Mexican",
+        "mediterranean": "Mediterranean",
+        "middle-eastern": "Middle Eastern",
+        "american": "American",
+        "vegan": "Vegan",
+        "vegetarian": "Vegetarian",
+        "fusion": "Fusion",
+        "pastry": "Pastry",
+        "wine": "Wine and tastings",
+        "other": "Other"
+      },
+      "eventTypes": "What types of events do you want to organize? (select at least 1)",
+      "eventTypeOptions": {
+        "supper-club": {
+          "label": "Supper Club",
+          "description": "Home dinners"
+        },
+        "cooking-class": {
+          "label": "Workshops",
+          "description": "Cooking classes"
+        },
+        "tasting": {
+          "label": "Tastings",
+          "description": "Wine, beer, whisky"
+        },
+        "popup": {
+          "label": "Pop-up",
+          "description": "Temporary restaurant"
+        },
+        "active-food": {
+          "label": "Active + Food",
+          "description": "Sports and food"
+        }
+      },
+      "bio": "Short bio (min. 50 characters)",
+      "bioPlaceholder": "Tell guests about yourself, your passion for cooking, where it came from, what inspires you...",
+      "bioHint": "This will be visible on your profile",
+      "bioCounter": "{count}/50"
+    },
+    "photos": {
+      "title": "Photos",
+      "subtitleIndividual": "Show yourself and your culinary creations",
+      "subtitleRestaurant": "Restaurant logo and food photos",
+      "profilePhoto": "Your profile photo",
+      "logo": "Restaurant logo",
+      "addPhoto": "Add photo",
+      "changePhoto": "Change photo",
+      "addLogo": "Add logo",
+      "changeLogo": "Change logo",
+      "photoHint": "Bright, friendly face photo. JPG or PNG, max 5MB.",
+      "logoHint": "Square format logo. JPG or PNG, max 5MB.",
+      "foodPhotosIndividual": "Photos of your dishes (optional, max 5)",
+      "foodPhotosRestaurant": "Food / interior photos (optional, max 5)",
+      "add": "Add",
+      "foodPhotosHintIndividual": "Show your best dishes! Good photos attract more guests.",
+      "foodPhotosHintRestaurant": "Show the atmosphere and dishes! Add photos of interior or your specialties.",
+      "tip": "Tip",
+      "tipTextIndividual": "Hosts with professional food photos get on average 3x more bookings!",
+      "tipTextRestaurant": "Restaurants with interior and food photo galleries attract more guests to events!"
+    },
+    "schedule": {
+      "title": "Verification meeting",
+      "subtitle": "Select dates when you can meet with our team (online or in Wrocław)",
+      "selectDays": "Select available days (min. 1)",
+      "selectTimes": "Preferred times (min. 1)",
+      "terms": "I accept the <terms>terms of service</terms> and <privacy>privacy policy</privacy> of the Seated platform.",
+      "verification": "I understand that my application will be verified and may be rejected. I consent to a verification visit at my event location.",
+      "whatNext": "What's next?",
+      "whatNextText": "After submitting the form, we will contact you within 48h to schedule a verification meeting. During the meeting, we will discuss details and answer questions."
+    },
+    "buttons": {
+      "back": "Back",
+      "next": "Next",
+      "submit": "Submit application",
+      "submitting": "Submitting..."
+    }
+  },
+  "admin": {
+    "title": "Admin panel",
+    "nav": {
+      "dashboard": "Dashboard",
+      "analytics": "Analytics",
+      "hosts": "Hosts",
+      "events": "Events",
+      "users": "Users",
+      "settings": "Settings"
+    },
+    "stats": {
+      "users": "Users",
+      "hosts": "Hosts",
+      "events": "Events",
+      "revenue": "Revenue"
+    },
+    "settings": {
+      "title": "Platform settings",
+      "commission": "Commission",
+      "commissionType": "Commission type",
+      "percentage": "Percentage (%)",
+      "fixed": "Fixed amount (PLN)",
+      "commissionValue": "Commission value",
+      "minCommission": "Minimum commission",
+      "maxCommission": "Maximum commission",
+      "preview": "Preview",
+      "previewText": "For event {price} PLN the commission will be: {fee} PLN",
+      "save": "Save settings",
+      "saving": "Saving...",
+      "saved": "Saved!"
+    },
+    "vouchers": {
+      "title": "Vouchers & Gift Cards",
+      "subtitle": "Manage discount codes and gift cards",
+      "createVoucher": "New voucher",
+      "createVoucherDesc": "Create a new discount code",
+      "code": "Code",
+      "type": "Type",
+      "percentage": "Percentage",
+      "fixed": "Fixed amount",
+      "giftCard": "Gift card",
+      "value": "Value",
+      "minOrder": "Min. order",
+      "maxDiscount": "Max discount",
+      "validFrom": "Valid from",
+      "validUntil": "Valid until",
+      "usageLimit": "Usage limit",
+      "unlimited": "Unlimited",
+      "description": "Description",
+      "cancel": "Cancel",
+      "create": "Create",
+      "statusActive": "Active",
+      "statusUsed": "Used",
+      "statusExpired": "Expired",
+      "statusDisabled": "Disabled",
+      "activeVouchers": "Active vouchers",
+      "giftCards": "Gift cards",
+      "totalUsages": "Total usages",
+      "allVouchers": "All vouchers",
+      "remaining": "Remaining",
+      "uses": "uses",
+      "disable": "Disable",
+      "enable": "Enable"
+    }
+  },
+  "faqPage": {
+    "backToHome": "Back to home",
+    "title": "Frequently Asked Questions",
+    "subtitle": "Find answers to the most common questions about Seated. Didn't find an answer?",
+    "contactLink": "Write to us",
+    "categories": {
+      "general": {
+        "label": "General",
+        "description": "Basic information about Seated"
+      },
+      "booking": {
+        "label": "Bookings",
+        "description": "How to book and cancel"
+      },
+      "hosts": {
+        "label": "For Hosts",
+        "description": "Information for organizers"
+      },
+      "payments": {
+        "label": "Payments",
+        "description": "How payments and refunds work"
+      }
+    },
+    "contact": {
+      "title": "Didn't find an answer?",
+      "subtitle": "Our support team is ready to answer all your questions.",
+      "writeToUs": "Write to us",
+      "howItWorks": "How does Seated work?"
+    }
+  },
+  "errors": {
+    "notFound": "Page not found",
+    "notFoundDesc": "Sorry, we couldn't find the page you're looking for.",
+    "backHome": "Back to home",
+    "generic": "Something went wrong",
+    "tryAgain": "Try again"
+  },
+  "time": {
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "minutes": "{count} min",
+    "hours": "{count} hrs"
+  },
+  "feedback": {
+    "backToBookings": "Back to bookings",
+    "backToPanel": "Back to panel",
+    "continue": "Continue",
+    "back": "Back",
+    "submit": "Submit feedback",
+    "submitting": "Submitting...",
+    "previous": "Previous",
+    "next": "Next",
+    "guest": {
+      "title": "Share your feedback",
+      "subtitle": "Your feedback helps hosts improve and other guests find great events",
+      "hostedBy": "Hosted by: {name}",
+      "step1": {
+        "title": "Rate your experience",
+        "description": "How would you rate different aspects of the event?"
+      },
+      "step2": {
+        "title": "Highlights and review",
+        "description": "What was the best part? Share your thoughts"
+      },
+      "step3": {
+        "title": "Add photos",
+        "description": "Optional - show others what the event looked like"
+      },
+      "categories": {
+        "food": "Food",
+        "atmosphere": "Atmosphere",
+        "communication": "Communication",
+        "value": "Value for money",
+        "overall": "Overall"
+      },
+      "highlights": {
+        "label": "What did you like the most?",
+        "deliciousFood": "Delicious food",
+        "greatHost": "Great host",
+        "beautifulSetting": "Beautiful setting",
+        "learnedSomething": "Learned something",
+        "metCoolPeople": "Met cool people",
+        "worthThePrice": "Worth the price",
+        "wouldReturn": "Would return",
+        "instagramWorthy": "Instagram-worthy"
+      },
+      "review": {
+        "label": "Your review",
+        "placeholder": "Describe your experience - what did you like, what was special...",
+        "hint": "Minimum {min} characters",
+        "public": "Publish review on host's profile"
+      },
+      "photos": {
+        "label": "Photos from the event (optional)",
+        "add": "Add photo",
+        "hint": "You can add up to 3 photos. Photos will be publicly visible."
+      },
+      "summary": {
+        "title": "Summary",
+        "overallRating": "Overall rating",
+        "highlights": "Highlights",
+        "photos": "Photos"
+      }
+    },
+    "host": {
+      "title": "Rate your guests",
+      "subtitle": "Your feedback is private and helps build a trusted community",
+      "guestsAttended": "guests",
+      "lastGuest": "Last guest",
+      "submitAll": "Submit all ratings",
+      "ratings": {
+        "label": "Rate this guest"
+      },
+      "categories": {
+        "punctuality": "Punctuality",
+        "respect": "Respect",
+        "engagement": "Engagement",
+        "overall": "Overall"
+      },
+      "tags": {
+        "positive": "Positive traits",
+        "concerns": "Concerns (optional)",
+        "greatGuest": "Great guest",
+        "friendly": "Friendly",
+        "engaged": "Engaged",
+        "helpful": "Helpful",
+        "punctual": "Punctual",
+        "wouldHostAgain": "Would host again",
+        "late": "Late",
+        "noShow": "No-show",
+        "dietaryIssues": "Dietary issues",
+        "disruptive": "Disruptive"
+      },
+      "privateNote": {
+        "label": "Private notes",
+        "placeholder": "Notes just for you - won't be visible to the guest...",
+        "hint": "These notes are private and will help you remember this guest"
+      },
+      "eventNotes": {
+        "title": "Event notes",
+        "description": "Optional notes about the entire event",
+        "placeholder": "Notes about the event, ideas for the future..."
+      },
+      "summary": {
+        "title": "Summary",
+        "guestsRated": "Guests rated: {rated} of {total}"
+      }
+    },
+    "submitted": {
+      "title": "Thank you for your feedback!",
+      "description": "Your feedback helps build a better community",
+      "xpEarned": "You earned {xp} XP for sharing your feedback!",
+      "viewBookings": "My bookings",
+      "browseEvents": "Browse events",
+      "hostTitle": "Thank you for your ratings!",
+      "hostDescription": "Your feedback helps build a trusted community",
+      "privateNote": "Your notes and ratings are private and only visible to you",
+      "viewDashboard": "Back to dashboard",
+      "createEvent": "Create new event"
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "subtitle": "Manage your notifications",
+    "enable": "Enable notifications",
+    "enableDescription": "Receive notifications about new messages, bookings and event updates",
+    "enabled": "Notifications enabled",
+    "disabled": "Notifications disabled",
+    "permissionDenied": "Notifications are blocked in your browser. Change browser settings to enable notifications.",
+    "categories": {
+      "bookings": "Bookings",
+      "bookingsDesc": "Confirmations, status changes and reminders",
+      "messages": "Messages",
+      "messagesDesc": "New messages from hosts or guests",
+      "events": "Events",
+      "eventsDesc": "New events from followed hosts",
+      "reminders": "Reminders",
+      "remindersDesc": "Reminders before events",
+      "marketing": "Marketing",
+      "marketingDesc": "Promotions and platform news"
+    },
+    "testNotification": "Send test notification",
+    "testSent": "Test notification has been sent"
+  },
+  "calendar": {
+    "title": "Calendar",
+    "subtitle": "Your events in calendar view",
+    "today": "Today",
+    "month": "Month",
+    "week": "Week",
+    "list": "List",
+    "noEventsThisMonth": "No events this month",
+    "noEventsThisWeek": "No events this week",
+    "upcomingEvents": "Upcoming events",
+    "pastEvents": "Past events",
+    "draft": "Draft",
+    "published": "Published",
+    "pendingReview": "Pending review",
+    "guests": "guests",
+    "spotsLeft": "spots left",
+    "viewDetails": "View details",
+    "editEvent": "Edit",
+    "createEvent": "Create event",
+    "months": {
+      "january": "January",
+      "february": "February",
+      "march": "March",
+      "april": "April",
+      "may": "May",
+      "june": "June",
+      "july": "July",
+      "august": "August",
+      "september": "September",
+      "october": "October",
+      "november": "November",
+      "december": "December"
+    },
+    "weekdays": {
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "sun": "Sun"
+    }
+  },
+  "waitlist": {
+    "title": "Waitlist",
+    "joinWaitlist": "Join waitlist",
+    "wantToKnow": "Want to know when a spot opens up?",
+    "description": "Enter your email and we'll notify you when a spot becomes available for this event.",
+    "email": "Email address",
+    "emailPlaceholder": "your@email.com",
+    "join": "Join waitlist",
+    "joining": "Joining...",
+    "success": "You're on the waitlist!",
+    "successDescription": "We'll notify you by email when a spot opens up. You'll have 12 hours to book.",
+    "alreadyJoined": "You're already on the waitlist",
+    "alreadyJoinedDescription": "We'll notify you when a spot opens up",
+    "position": "Position on list: {position}",
+    "peopleWaiting": "{count} people waiting",
+    "cancel": "Cancel",
+    "close": "Close",
+    "remove": "Remove from list",
+    "notifyWindow": "You'll have 12h to book after receiving the notification"
+  },
+  "messages": {
+    "title": "Messages",
+    "subtitle": "Your conversations",
+    "noConversations": "No messages yet",
+    "noConversationsDesc": "When you start a conversation with a host or guest, it will appear here",
+    "searchPlaceholder": "Search messages...",
+    "typeMessage": "Type a message...",
+    "send": "Send",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "online": "Online",
+    "lastSeen": "Last seen {time}",
+    "unread": "{count} unread",
+    "markAsRead": "Mark as read",
+    "startConversation": "Start conversation",
+    "aboutEvent": "About: {event}",
+    "host": "Host",
+    "guest": "Guest",
+    "you": "You",
+    "emptyChat": "Start the conversation by sending a message",
+    "messageHost": "Message host",
+    "messageGuest": "Message guest",
+    "backToMessages": "Back to messages"
+  },
+  "howItWorksPage": {
+    "hero": {
+      "title": "How does Seated work?",
+      "subtitle": "Discover unique culinary experiences in Wrocław. We connect food lovers with talented hosts in an intimate atmosphere.",
+      "cta": "Browse events",
+      "ctaSecondary": "Become a host"
+    },
+    "steps": {
+      "title": "5 simple steps",
+      "subtitle": "From discovery to experience - the whole process is simple and intuitive",
+      "step1": {
+        "title": "1. Find an event",
+        "description": "Browse our culinary events in Wrocław. Filter by cuisine type, date or location. From intimate dinners to cooking workshops."
+      },
+      "step2": {
+        "title": "2. Book your spot",
+        "description": "Choose a convenient date and number of people. Secure online payment. You'll receive confirmation and event details by email."
+      },
+      "step3": {
+        "title": "3. Get the location",
+        "description": "24h before the event you'll receive the exact address and directions. Most events take place in private homes or unique locations."
+      },
+      "step4": {
+        "title": "4. Enjoy the experience",
+        "description": "Meet new people, discover amazing flavors and enjoy a unique atmosphere. It's more than food - it's an experience."
+      },
+      "step5": {
+        "title": "5. Leave a review",
+        "description": "After the event you can rate the host and share your impressions. Your opinion helps others find the best experiences."
+      }
+    },
+    "eventTypes": {
+      "title": "Types of events",
+      "subtitle": "Choose the experience that interests you",
+      "supperClub": {
+        "title": "Supper Club",
+        "description": "Multi-course dinner in a host's private home"
+      },
+      "chefsTable": {
+        "title": "Chef's Table",
+        "description": "Exclusive tasting menu from a professional chef"
+      },
+      "workshops": {
+        "title": "Workshops",
+        "description": "Learn to cook from professionals"
+      },
+      "tastings": {
+        "title": "Tastings",
+        "description": "Discover wines, cheeses, coffee and other specialties"
+      },
+      "popup": {
+        "title": "Pop-up",
+        "description": "Temporary restaurants in unexpected places"
+      },
+      "activeFood": {
+        "title": "Active + Food",
+        "description": "Combining physical activity with culinary experience"
+      },
+      "farmExperience": {
+        "title": "Farm Experience",
+        "description": "From field to table - discover local farms"
+      }
+    },
+    "features": {
+      "title": "Why Seated?",
+      "subtitle": "Safety and quality are our priorities",
+      "securePayments": {
+        "title": "Secure payments",
+        "description": "All transactions are encrypted and protected. You only pay after confirmation."
+      },
+      "verifiedHosts": {
+        "title": "Verified hosts",
+        "description": "Every host goes through verification. We check experience, certificates and reviews."
+      },
+      "flexibleCancellation": {
+        "title": "Flexible cancellation",
+        "description": "You can cancel your booking up to 48h before the event and get a full refund."
+      },
+      "foodieCommunity": {
+        "title": "Foodie community",
+        "description": "Join a community of food lovers. Follow favorite hosts and discover new flavors."
+      }
+    },
+    "forHosts": {
+      "title": "Are you passionate about cooking?",
+      "subtitle": "Join our host community and share your passion with others. Earn doing what you love and meet amazing people.",
+      "cta": "Become a host",
+      "ctaSecondary": "FAQ for hosts"
+    },
+    "cta": {
+      "title": "Ready for culinary adventures?",
+      "subtitle": "Join thousands of people discovering Wrocław through flavors.",
+      "button": "Create free account"
+    }
+  },
+  "reports": {
+    "report": "Report",
+    "submitReport": "Submit report",
+    "reportEvent": "Report event",
+    "reportHost": "Report host",
+    "reportGuest": "Report guest",
+    "reportEventDescription": "Report an issue with this event. Our team will review your report.",
+    "reportHostDescription": "Report an issue with this host. Our team will review your report.",
+    "reportGuestDescription": "Report an issue with this guest. Information is confidential.",
+    "relatedToEvent": "Related to event",
+    "category": "Issue category",
+    "selectCategory": "Select category",
+    "description": "Problem description",
+    "descriptionPlaceholder": "Describe in detail what happened, when and what were the circumstances...",
+    "descriptionHint": "Provide as much detail as possible to help us assess the situation.",
+    "evidence": "Evidence (links)",
+    "evidencePlaceholder": "https://example.com/screenshot.png",
+    "evidenceHint": "If you have screenshots or other evidence, provide a link.",
+    "optional": "optional",
+    "falseReportWarning": "Submitting false reports may result in account suspension. Make sure your report is accurate.",
+    "cancel": "Cancel",
+    "submit": "Submit report",
+    "submitting": "Submitting...",
+    "reportSubmitted": "Report submitted!",
+    "reportSubmittedDescription": "Thank you for your report. Our team will review it within 48 hours.",
+    "reportId": "Report ID",
+    "reviewPromise": "We will review your report within 48 hours",
+    "notificationPromise": "We will notify you about actions taken",
+    "close": "Close",
+    "admin": {
+      "title": "Reports",
+      "subtitle": "Manage user reports",
+      "allReports": "All",
+      "pending": "Pending",
+      "underReview": "Under review",
+      "resolved": "Resolved",
+      "dismissed": "Dismissed",
+      "noReports": "No reports",
+      "viewDetails": "Details",
+      "assignToMe": "Assign to me",
+      "changeStatus": "Change status",
+      "addNote": "Add note",
+      "resolve": "Resolve",
+      "dismiss": "Dismiss",
+      "reporter": "Reporter",
+      "reported": "Reported",
+      "category": "Category",
+      "status": "Status",
+      "date": "Date",
+      "actions": "Actions",
+      "resolution": "Resolution",
+      "resolutions": {
+        "warningIssued": "Warning issued",
+        "accountSuspended": "Account suspended",
+        "refundIssued": "Refund issued",
+        "noAction": "No action",
+        "escalated": "Escalated"
+      }
+    }
+  },
+  "communication": {
+    "title": "Communication Automation",
+    "subtitle": "Manage message templates and automatic notifications",
+    "saveSettings": "Save settings",
+    "saving": "Saving...",
+    "saved": "Saved!",
+    "tabs": {
+      "reminders": "Reminders",
+      "followups": "Follow-up",
+      "templates": "Templates",
+      "settings": "Settings"
+    },
+    "reminders": {
+      "title": "Automatic reminders",
+      "description": "Send reminders to guests before the event",
+      "timing": {
+        "7_days": "7 days before",
+        "7_days_desc": "One week before the event",
+        "48_hours": "48 hours before",
+        "48_hours_desc": "Two days before the event",
+        "24_hours": "24 hours before",
+        "24_hours_desc": "Day before the event",
+        "2_hours": "2 hours before",
+        "2_hours_desc": "Shortly before start"
+      },
+      "editTemplate": "Edit template",
+      "tip": "Studies show that two reminders (24h and 2h before) significantly increase event attendance."
+    },
+    "followups": {
+      "title": "Follow-up sequence",
+      "description": "Automatic messages after the event",
+      "timing": {
+        "same_day": "Same day",
+        "same_day_desc": "Evening after the event",
+        "1_day": "1 day after",
+        "1_day_desc": "Next day",
+        "3_days": "3 days after",
+        "3_days_desc": "After a few days",
+        "7_days": "7 days after",
+        "7_days_desc": "One week later",
+        "14_days": "14 days after",
+        "14_days_desc": "Two weeks later"
+      },
+      "timeline": "Automatic messages timeline"
+    },
+    "reviews": {
+      "title": "Review requests",
+      "description": "Automatically ask guests to leave a review",
+      "sendAfter": "Send review request"
+    },
+    "rebooking": {
+      "title": "Return offers",
+      "description": "Encourage guests to rebook with a discount",
+      "discountLabel": "Discount amount",
+      "discountRecommendation": "Recommended: 10-20%",
+      "validityLabel": "Offer validity",
+      "days": "days"
+    },
+    "templates": {
+      "title": "Message templates",
+      "subtitle": "Personalize automatic message content",
+      "newTemplate": "New template",
+      "editTemplate": "Edit template",
+      "default": "Default",
+      "types": {
+        "booking_confirmation": "Booking request confirmation",
+        "booking_approved": "Booking approved",
+        "booking_declined": "Booking declined",
+        "reminder_week": "Reminder - 1 week",
+        "reminder_day": "Reminder - 24h",
+        "reminder_hours": "Reminder - 2h",
+        "post_event_thanks": "Thank you",
+        "review_request": "Review request",
+        "rebooking_offer": "Return offer",
+        "custom": "Custom template"
+      },
+      "variables": {
+        "title": "Available variables",
+        "description": "Use these variables in templates - they will be automatically filled",
+        "guest": "Guest",
+        "event": "Event",
+        "booking": "Booking",
+        "host": "Host",
+        "special": "Special"
+      },
+      "form": {
+        "name": "Template name",
+        "namePlaceholder": "e.g. My booking confirmation",
+        "subject": "Message subject",
+        "subjectPlaceholder": "e.g. ✅ Booking confirmed - {{event_title}}",
+        "body": "Message body",
+        "bodyPlaceholder": "Message content...",
+        "quickInsert": "Quick variable insert",
+        "cancel": "Cancel",
+        "save": "Save template"
+      }
+    },
+    "channels": {
+      "title": "Communication channels",
+      "description": "Choose how you want to communicate with guests",
+      "email": "Email",
+      "emailDescription": "Detailed messages with full content",
+      "sms": "SMS",
+      "smsDescription": "Short reminders (98% open rate!)",
+      "comingSoon": "Coming soon"
+    },
+    "personalization": {
+      "title": "Personalization",
+      "description": "Additional elements in messages",
+      "hostPhoto": "Include your photo",
+      "hostPhotoDescription": "Your profile photo in message header",
+      "personalMessage": "Personal message field",
+      "personalMessageDescription": "Option to add your own note with each booking"
+    }
+  },
+  "social": {
+    "feed": "Community",
+    "feedSubtitle": "See what your homies are up to",
+    "friends": "Friends",
+    "nearby": "Nearby",
+    "global": "Popular",
+    "noFriendsPosts": "No activity from friends. Follow more homies!",
+    "noNearbyPosts": "No activity in your area",
+    "noGlobalPosts": "No popular posts",
+    "lovedIt": "Loved it!",
+    "great": "Great",
+    "good": "Good",
+    "notForMe": "Not for me",
+    "recommend": "Recommend",
+    "whosGoing": "Who's going?",
+    "homiesGoing": "{count} of your homies are going",
+    "homiesInterested": "{count} of your homies are interested",
+    "interested": "Interested",
+    "confirmed": "Confirmed",
+    "showAll": "Show all",
+    "hideList": "Hide list",
+    "viewEvent": "View event",
+    "attended": "attended",
+    "reviewed": "reviewed",
+    "goingTo": "is going to",
+    "recommended": "recommends",
+    "earnedBadge": "earned a badge",
+    "like": "Like",
+    "comment": "Comment",
+    "share": "Share",
+    "comments": "comments",
+    "writeComment": "Write a comment...",
+    "sendComment": "Send"
+  },
+  "chat": {
+    "title": "Chat",
+    "newMessage": "New message",
+    "newConversation": "New conversation",
+    "searchHomies": "Search homies...",
+    "noConversations": "No conversations",
+    "noConversationsDesc": "Start a conversation with homies!",
+    "startChat": "Start chat",
+    "typeMessage": "Type a message...",
+    "send": "Send",
+    "shareEvent": "Share event",
+    "planTogether": "Plan together",
+    "sharedEvent": "shared an event",
+    "planningInvite": "invited to plan together",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "online": "Online",
+    "backToChats": "Back to chats"
+  },
+  "wishlist": {
+    "shared": "Shared lists",
+    "sharedSubtitle": "Plan events together with homies",
+    "createShared": "Create shared list",
+    "createFirst": "Create first list",
+    "newList": "New shared list",
+    "newListDesc": "Create an event list and invite homies to collaborate",
+    "listName": "List name",
+    "listNamePlaceholder": "e.g. Birthday dinner",
+    "visibility": "Visibility",
+    "private": "Private - only you",
+    "collaborators": "Collaborators - invited homies",
+    "public": "Public - everyone can see",
+    "create": "Create",
+    "cancel": "Cancel",
+    "noLists": "No lists",
+    "noListsDesc": "Create your first shared list and invite homies",
+    "inviteHomies": "Invite friends",
+    "inviteToList": "Invite to shared list",
+    "selectHomies": "Select homies you want to invite",
+    "invited": "Invited",
+    "sendInvites": "Send invites",
+    "vote": "Vote",
+    "going": "I'm going!",
+    "interested": "Interested",
+    "skip": "Skip",
+    "goingCount": "{count} going",
+    "interestedCount": "{count} interested",
+    "skipCount": "{count} skipping",
+    "events": "events",
+    "people": "people",
+    "author": "author",
+    "collaboratorsCount": "Collaborators",
+    "addEvent": "Add event",
+    "noEvents": "No events on the list",
+    "noEventsDesc": "Add events you want to consider!",
+    "browseEvents": "Browse events",
+    "backToLists": "Back to lists",
+    "discussTogether": "Discuss the choice together",
+    "discussDesc": "Start a conversation with collaborators about events",
+    "openChat": "Open chat",
+    "viewList": "View list"
+  },
+  "planning": {
+    "title": "Planning",
+    "createSession": "Plan an event",
+    "proposeDates": "Propose dates",
+    "voteOnDate": "Vote on date",
+    "bookTogether": "Book together",
+    "status": {
+      "planning": "Planning in progress",
+      "booked": "Booked",
+      "completed": "Completed"
+    }
+  },
+  "homies": {
+    "title": "My Homies",
+    "subtitle": "Follow hosts and other foodies, track their activity",
+    "activity": "Activity",
+    "following": "Following",
+    "followers": "Followers",
+    "chat": "Chat",
+    "wishlists": "Lists",
+    "mutualHomies": "Mutual Homies",
+    "conversations": "Conversations",
+    "sharedLists": "Shared lists",
+    "unread": "unread",
+    "noFollowing": "You're not following anyone yet",
+    "noFollowers": "No one is following you yet",
+    "discoverHosts": "Discover hosts",
+    "viewAllChats": "View all",
+    "viewAllLists": "View all",
+    "noMessages": "No messages",
+    "startChatDesc": "Start a chat with homies!",
+    "createListDesc": "Create your first shared list!",
+    "createList": "Create list"
+  },
+  "hostVerification": {
+    "premium": "Premium Host",
+    "premiumDesc": "Distinguished host with highest standards",
+    "verified": "Verified",
+    "verifiedDesc": "Host has completed full Seated verification",
+    "pending": "Pending Verification",
+    "pendingDesc": "Verification in progress - some details are being checked",
+    "rejected": "Not Verified",
+    "rejectedDesc": "Host did not pass the verification process",
+    "suspended": "Suspended",
+    "suspendedDesc": "Account temporarily suspended",
+    "verificationIncludes": "Verification includes",
+    "identity": "Identity",
+    "location": "Location",
+    "foodSafety": "Food Safety",
+    "backgroundCheck": "Background Check",
+    "verifiedAt": "Verified on",
+    "verificationStatus": "Verification Status",
+    "trustedHost": "Trusted Host",
+    "trustedHostDesc": "This host has passed full verification, has great reviews and regularly hosts events."
+  },
+  "giftCards": {
+    "title": "Gift Cards",
+    "subtitle": "Give the gift of a unique culinary experience",
+    "benefit1Title": "Any event",
+    "benefit1Desc": "Recipient chooses from all events on the platform",
+    "benefit2Title": "Valid for a year",
+    "benefit2Desc": "Card is valid for 12 months from purchase",
+    "benefit3Title": "Personal message",
+    "benefit3Desc": "Add wishes that will be delivered to the recipient",
+    "selectAmount": "Select amount",
+    "selectAmountDesc": "How much should the gift card be worth?",
+    "or": "or",
+    "customAmount": "Custom amount",
+    "minAmount": "Minimum amount: 50 PLN",
+    "giftCardPreview": "Gift card value",
+    "validFor": "Valid for 12 months",
+    "continue": "Continue",
+    "recipientDetails": "Recipient details",
+    "recipientDetailsDesc": "Enter the details of the person receiving the card",
+    "selectedAmount": "Selected amount",
+    "recipientName": "Recipient name",
+    "recipientNamePlaceholder": "e.g. Anna",
+    "recipientEmail": "Recipient email",
+    "recipientEmailPlaceholder": "anna@example.com",
+    "recipientEmailHint": "We'll send the gift card to this address",
+    "yourEmail": "Your email",
+    "yourEmailPlaceholder": "your@email.com",
+    "yourEmailHint": "You'll receive purchase confirmation",
+    "personalMessage": "Personal message (optional)",
+    "personalMessagePlaceholder": "e.g. Happy Birthday! 🎂",
+    "giftCardValue": "Card value",
+    "total": "Total",
+    "back": "Back",
+    "processing": "Processing...",
+    "payAndSend": "Pay and send",
+    "successTitle": "Gift card sent!",
+    "successDesc": "Recipient will receive it at the provided email address",
+    "giftCardCode": "Card code",
+    "sentTo": "Sent to",
+    "for": "For",
+    "browseEvents": "Browse events",
+    "buyAnother": "Buy another card",
+    "howItWorks": "How it works",
+    "step1Title": "Choose amount",
+    "step1Desc": "Decide how much to gift",
+    "step2Title": "Enter details",
+    "step2Desc": "Add recipient email and your message",
+    "step3Title": "Pay",
+    "step3Desc": "Secure card payment",
+    "step4Title": "Done!",
+    "step4Desc": "Recipient gets the card by email"
+  }
+}
