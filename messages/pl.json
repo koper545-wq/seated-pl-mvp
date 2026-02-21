@@ -64,7 +64,9 @@
     "featured": {
       "title": "Nadchodzące wydarzenia",
       "subtitle": "Rezerwuj miejsca zanim się skończą",
-      "viewAll": "Zobacz wszystkie"
+      "viewAll": "Zobacz wszystkie",
+      "noEvents": "Brak nadchodzących wydarzeń",
+      "noEventsDescription": "Aktualnie nie ma żadnych wydarzeń spełniających kryteria. Bądź pierwszym hostem i stwórz swoje wydarzenie!"
     },
     "benefits": {
       "title": "Dlaczego Seated?",

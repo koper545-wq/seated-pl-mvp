@@ -5,6 +5,11 @@ import { Badge } from "@/components/ui/badge";
 import { EventCard } from "@/components/events";
 import { FAQSection } from "@/components/faq-section";
 import { getTranslations } from "next-intl/server";
+import { db } from "@/lib/db";
+import { EventStatus } from "@prisma/client";
+import { format } from "date-fns";
+import { pl } from "date-fns/locale";
+import { Calendar as CalendarIcon } from "lucide-react";
 import {
   ChefHat,
   Wine,
@@ -79,74 +84,65 @@ const categories: Category[] = [
   },
 ];
 
-const mockEvents = [
-  {
-    id: "1",
-    title: "Italian Dinner at Anna's - Tuscan Flavors",
-    type: "Supper Club",
-    date: "Sat, Feb 15 · 7:00 PM",
-    location: "Old Town, Wrocław",
-    price: 150,
-    spotsLeft: 4,
-    imageGradient: "from-amber-200 to-orange-300",
-  },
-  {
-    id: "2",
-    title: "Sushi Masterclass - From Basics to Master",
-    type: "Workshops",
-    date: "Tue, Feb 18 · 6:00 PM",
-    location: "Nadodrze, Wrocław",
-    price: 200,
-    spotsLeft: 6,
-    imageGradient: "from-rose-200 to-pink-300",
-  },
-  {
-    id: "3",
-    title: "Georgian Natural Wines - Tasting",
-    type: "Tastings",
-    date: "Fri, Feb 22 · 8:00 PM",
-    location: "Downtown, Wrocław",
-    price: 120,
-    spotsLeft: 2,
-    imageGradient: "from-purple-200 to-violet-300",
-  },
-  {
-    id: "4",
-    title: "Thai Street Food Pop-up",
-    type: "Pop-up",
-    date: "Sat, Mar 1 · 6:00 PM",
-    location: "Przedmieście Oławskie",
-    price: 89,
-    spotsLeft: 0,
-    imageGradient: "from-orange-200 to-red-300",
-  },
-  {
-    id: "5",
-    title: "Run + Brunch - Morning Energy",
-    type: "Active + Food",
-    date: "Sun, Mar 2 · 9:00 AM",
-    location: "Szczytnicki Park",
-    price: 75,
-    spotsLeft: 12,
-    imageGradient: "from-green-200 to-teal-300",
-  },
-  {
-    id: "6",
-    title: "Georgian Khinkali - Dumpling Workshop",
-    type: "Workshops",
-    date: "Wed, Mar 5 · 6:30 PM",
-    location: "Ołbin, Wrocław",
-    price: 160,
-    spotsLeft: 8,
-    imageGradient: "from-yellow-200 to-amber-300",
-  },
+// Gradient palette for events without images
+const EVENT_GRADIENTS = [
+  "from-amber-200 to-orange-300",
+  "from-rose-200 to-pink-300",
+  "from-purple-200 to-violet-300",
+  "from-orange-200 to-red-300",
+  "from-green-200 to-teal-300",
+  "from-yellow-200 to-amber-300",
+  "from-blue-200 to-indigo-300",
+  "from-emerald-200 to-cyan-300",
 ];
+
+// Event type display labels
+const EVENT_TYPE_LABELS: Record<string, string> = {
+  SUPPER_CLUB: "Supper Club",
+  CHEFS_TABLE: "Chef's Table",
+  POPUP: "Pop-up",
+  WORKSHOP: "Warsztaty",
+  TASTING: "Degustacje",
+  FOOD_TOUR: "Food Tour",
+  ACTIVE_FOOD: "Active + Food",
+  FARM_EXPERIENCE: "Farm Experience",
+  OTHER: "Inne",
+};
 
 const benefitIcons = [Star, Shield, CreditCard];
 const benefitKeys = ["verified", "secure", "transparent"] as const;
 
+async function getFeaturedEvents() {
+  try {
+    const events = await db.event.findMany({
+      where: {
+        status: EventStatus.PUBLISHED,
+        date: { gte: new Date() },
+      },
+      orderBy: { date: "asc" },
+      take: 6,
+    });
+
+    return events.map((event, index) => ({
+      id: event.id,
+      title: event.title,
+      type: EVENT_TYPE_LABELS[event.eventType] || event.eventType,
+      date: format(new Date(event.date), "EEE, d MMM · HH:mm", { locale: pl }),
+      location: event.locationPublic || "Wrocław",
+      price: event.price / 100, // grosze → PLN
+      spotsLeft: event.spotsLeft,
+      imageGradient: EVENT_GRADIENTS[index % EVENT_GRADIENTS.length],
+      imageUrl: event.images?.[0] || undefined,
+    }));
+  } catch (error) {
+    console.error("Failed to fetch featured events:", error);
+    return [];
+  }
+}
+
 export default async function Home() {
   const t = await getTranslations("home");
+  const featuredEvents = await getFeaturedEvents();
 
   const testimonials = [
     {
@@ -277,11 +273,26 @@ export default async function Home() {
               <Link href="/events">{t("featured.viewAll")}</Link>
             </Button>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {mockEvents.map((event) => (
-              <EventCard key={event.id} {...event} />
-            ))}
-          </div>
+          {featuredEvents.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {featuredEvents.map((event) => (
+                <EventCard key={event.id} {...event} />
+              ))}
+            </div>
+          ) : (
+            <Card className="border-dashed">
+              <CardContent className="py-12 text-center">
+                <CalendarIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">{t("featured.noEvents")}</h3>
+                <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                  {t("featured.noEventsDescription")}
+                </p>
+                <Button asChild className="bg-amber-600 hover:bg-amber-700">
+                  <Link href="/become-host">{t("hero.ctaSecondary")}</Link>
+                </Button>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </section>
 

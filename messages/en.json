@@ -64,7 +64,9 @@
     "featured": {
       "title": "Upcoming events",
       "subtitle": "Book your spot before they sell out",
-      "viewAll": "View all"
+      "viewAll": "View all",
+      "noEvents": "No upcoming events",
+      "noEventsDescription": "There are currently no events matching your criteria. Be the first host and create your event!"
     },
     "benefits": {
       "title": "Why Seated?",
