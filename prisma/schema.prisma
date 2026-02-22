@@ -75,24 +75,34 @@ model GuestProfile {
 }
 
 model HostProfile {
-  id                String   @id @default(cuid())
-  userId            String   @unique @map("user_id")
-  businessName      String   @map("business_name")
-  description       String?
-  avatarUrl         String?  @map("avatar_url")
-  coverUrl          String?  @map("cover_url")
-  phoneNumber       String?  @map("phone_number")
-  city              String   @default("Wrocław")
-  neighborhood      String?
-  cuisineSpecialties String[] @map("cuisine_specialties")
-  socialLinks       Json?    @map("social_links")
-  verified          Boolean  @default(false)
-  responseRate      Float?   @map("response_rate")
-  responseTime      Int?     @map("response_time") // in hours
-  onboardingPaid    Boolean  @default(false) @map("onboarding_paid")
-  bankAccount       Json?    @map("bank_account")
-  createdAt         DateTime @default(now()) @map("created_at")
-  updatedAt         DateTime @updatedAt @map("updated_at")
+  id                  String   @id @default(cuid())
+  userId              String   @unique @map("user_id")
+  businessName        String   @map("business_name")
+  description         String?
+  avatarUrl           String?  @map("avatar_url")
+  coverUrl            String?  @map("cover_url")
+  phoneNumber         String?  @map("phone_number")
+  city                String   @default("Wrocław")
+  neighborhood        String?
+  cuisineSpecialties  String[] @map("cuisine_specialties")
+  socialLinks         Json?    @map("social_links")
+  verified            Boolean  @default(false)
+  responseRate        Float?   @map("response_rate")
+  responseTime        Int?     @map("response_time") // in hours
+  onboardingPaid      Boolean  @default(false) @map("onboarding_paid")
+  bankAccount         Json?    @map("bank_account")
+  // Onboarding fields
+  hostSubtype         String?  @map("host_subtype") // "business" | "individual"
+  onboardingCompleted Boolean  @default(false) @map("onboarding_completed")
+  nip                 String?
+  website             String?
+  address             Json?    // { street, apartment, postalCode, city }
+  contactPerson       Json?    @map("contact_person") // { name, email, phone, position }
+  experienceLevel     String?  @map("experience_level") // "yes" | "no" | "professional"
+  experienceDetails   String?  @map("experience_details")
+  eventTypes          String[] @map("event_types")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
 
   user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   events    Event[]

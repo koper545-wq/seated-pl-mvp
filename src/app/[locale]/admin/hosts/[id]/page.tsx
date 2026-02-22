@@ -1,7 +1,7 @@
 "use client";
 
 import { use, useState, useEffect } from "react";
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { format } from "date-fns";
 import { pl } from "date-fns/locale";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,6 +32,8 @@ interface HostDetail {
   responseRate: number;
   responseTime: number;
   avatarUrl: string | null;
+  hostSubtype: string | null;
+  onboardingCompleted: boolean;
   createdAt: string;
   user: {
     id: string;
@@ -83,10 +85,17 @@ export default function HostDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
+  const router = useRouter();
   const [host, setHost] = useState<HostDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [actionMessage, setActionMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  const showMessage = (type: "success" | "error", text: string) => {
+    setActionMessage({ type, text });
+    setTimeout(() => setActionMessage(null), 4000);
+  };
 
   const fetchHost = async () => {
     try {
@@ -119,9 +128,48 @@ export default function HostDetailPage({
       });
       if (res.ok) {
         await fetchHost();
+        showMessage("success", verified ? "Host zweryfikowany" : "Weryfikacja cofnięta");
       }
     } catch (err) {
       console.error(err);
+      showMessage("error", "Błąd zmiany weryfikacji");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleResendApprovalEmail = async () => {
+    setIsProcessing(true);
+    try {
+      const res = await fetch(`/api/admin/hosts/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ resendApprovalEmail: true }),
+      });
+      if (res.ok) {
+        showMessage("success", "Email zatwierdzenia wysłany ponownie");
+      } else {
+        showMessage("error", "Błąd wysyłania emaila");
+      }
+    } catch {
+      showMessage("error", "Błąd wysyłania emaila");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleDeleteHost = async () => {
+    setIsProcessing(true);
+    try {
+      const res = await fetch(`/api/admin/hosts/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        router.push("/admin/hosts");
+      } else {
+        const data = await res.json();
+        showMessage("error", data.error || "Błąd usuwania hosta");
+      }
+    } catch {
+      showMessage("error", "Błąd usuwania hosta");
     } finally {
       setIsProcessing(false);
     }
@@ -162,6 +210,15 @@ export default function HostDetailPage({
 
   return (
     <div className="max-w-5xl mx-auto">
+      {/* Action message */}
+      {actionMessage && (
+        <div className={`mb-4 p-3 rounded-md text-sm font-medium ${
+          actionMessage.type === "success" ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"
+        }`}>
+          {actionMessage.text}
+        </div>
+      )}
+
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -185,15 +242,22 @@ export default function HostDetailPage({
             <p className="text-stone-500">{host.user.email}</p>
           </div>
         </div>
-        <span
-          className={`px-4 py-2 rounded-full text-sm font-medium ${
-            host.verified
-              ? "bg-green-100 text-green-700"
-              : "bg-yellow-100 text-yellow-700"
-          }`}
-        >
-          {host.verified ? "✅ Zweryfikowany" : "⏳ Oczekuje na weryfikację"}
-        </span>
+        <div className="flex items-center gap-2">
+          <span
+            className={`px-4 py-2 rounded-full text-sm font-medium ${
+              host.verified
+                ? "bg-green-100 text-green-700"
+                : "bg-yellow-100 text-yellow-700"
+            }`}
+          >
+            {host.verified ? "Zweryfikowany" : "Oczekuje"}
+          </span>
+          {host.hostSubtype && (
+            <span className="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+              {host.hostSubtype === "business" ? "Firma" : "Osoba fizyczna"}
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="grid md:grid-cols-3 gap-6">
@@ -366,46 +430,28 @@ export default function HostDetailPage({
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <p className="text-xs text-stone-400 uppercase tracking-wide">
-                  Wszystkie wydarzenia
-                </p>
-                <p className="text-2xl font-bold text-stone-900">
-                  {host.eventsCount}
-                </p>
+                <p className="text-xs text-stone-400 uppercase tracking-wide">Wszystkie wydarzenia</p>
+                <p className="text-2xl font-bold text-stone-900">{host.eventsCount}</p>
               </div>
               <div>
-                <p className="text-xs text-stone-400 uppercase tracking-wide">
-                  Aktywne wydarzenia
-                </p>
-                <p className="text-2xl font-bold text-green-600">
-                  {host.publishedEvents}
-                </p>
+                <p className="text-xs text-stone-400 uppercase tracking-wide">Aktywne wydarzenia</p>
+                <p className="text-2xl font-bold text-green-600">{host.publishedEvents}</p>
               </div>
               <div>
-                <p className="text-xs text-stone-400 uppercase tracking-wide">
-                  Łączne rezerwacje
-                </p>
-                <p className="text-2xl font-bold text-stone-900">
-                  {host.totalBookings}
-                </p>
+                <p className="text-xs text-stone-400 uppercase tracking-wide">Łączne rezerwacje</p>
+                <p className="text-2xl font-bold text-stone-900">{host.totalBookings}</p>
               </div>
               <div>
-                <p className="text-xs text-stone-400 uppercase tracking-wide">
-                  Łączny przychód
-                </p>
-                <p className="text-2xl font-bold text-amber-600">
-                  {formatPrice(host.totalRevenue)}
-                </p>
+                <p className="text-xs text-stone-400 uppercase tracking-wide">Łączny przychód</p>
+                <p className="text-2xl font-bold text-amber-600">{formatPrice(host.totalRevenue)}</p>
               </div>
               <div>
-                <p className="text-xs text-stone-400 uppercase tracking-wide">
-                  Data rejestracji
-                </p>
-                <p className="text-stone-900">
-                  {format(new Date(host.createdAt), "d MMMM yyyy", {
-                    locale: pl,
-                  })}
-                </p>
+                <p className="text-xs text-stone-400 uppercase tracking-wide">Data rejestracji</p>
+                <p className="text-stone-900">{format(new Date(host.createdAt), "d MMMM yyyy", { locale: pl })}</p>
+              </div>
+              <div>
+                <p className="text-xs text-stone-400 uppercase tracking-wide">Onboarding</p>
+                <p className="text-stone-900">{host.onboardingCompleted ? "Ukończony" : "Nie ukończony"}</p>
               </div>
             </CardContent>
           </Card>
@@ -419,12 +465,8 @@ export default function HostDetailPage({
               {host.verified ? (
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button
-                      className="w-full"
-                      variant="destructive"
-                      disabled={isProcessing}
-                    >
-                      ❌ Cofnij weryfikację
+                    <Button className="w-full" variant="destructive" disabled={isProcessing}>
+                      Cofnij weryfikację
                     </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
@@ -436,10 +478,7 @@ export default function HostDetailPage({
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel>Anuluj</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => handleVerifyToggle(false)}
-                        className="bg-red-600 hover:bg-red-700"
-                      >
+                      <AlertDialogAction onClick={() => handleVerifyToggle(false)} className="bg-red-600 hover:bg-red-700">
                         Tak, cofnij
                       </AlertDialogAction>
                     </AlertDialogFooter>
@@ -448,34 +487,30 @@ export default function HostDetailPage({
               ) : (
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button
-                      className="w-full bg-green-600 hover:bg-green-700"
-                      disabled={isProcessing}
-                    >
-                      ✅ Zweryfikuj hosta
+                    <Button className="w-full bg-green-600 hover:bg-green-700" disabled={isProcessing}>
+                      Zweryfikuj hosta
                     </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
                       <AlertDialogTitle>Zweryfikować hosta?</AlertDialogTitle>
                       <AlertDialogDescription>
-                        {host.businessName} otrzyma status zweryfikowanego hosta
-                        i będzie mógł tworzyć wydarzenia. Zostanie wysłany email
-                        z potwierdzeniem.
+                        {host.businessName} otrzyma status zweryfikowanego hosta. Zostanie wysłany email z potwierdzeniem.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel>Anuluj</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => handleVerifyToggle(true)}
-                        className="bg-green-600 hover:bg-green-700"
-                      >
+                      <AlertDialogAction onClick={() => handleVerifyToggle(true)} className="bg-green-600 hover:bg-green-700">
                         Tak, zweryfikuj
                       </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
               )}
+
+              <Button variant="outline" className="w-full" onClick={handleResendApprovalEmail} disabled={isProcessing}>
+                📩 Wyślij ponownie email zatwierdzenia
+              </Button>
 
               <Link href={`/admin/users/${host.userId}`}>
                 <Button className="w-full" variant="outline">
@@ -491,20 +526,49 @@ export default function HostDetailPage({
               <CardTitle className="text-lg">📞 Kontakt</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <a
-                href={`mailto:${host.user.email}`}
-                className="flex items-center gap-2 text-sm text-blue-600 hover:underline"
-              >
+              <a href={`mailto:${host.user.email}`} className="flex items-center gap-2 text-sm text-blue-600 hover:underline">
                 ✉️ {host.user.email}
               </a>
               {host.phoneNumber && (
-                <a
-                  href={`tel:${host.phoneNumber}`}
-                  className="flex items-center gap-2 text-sm text-blue-600 hover:underline"
-                >
+                <a href={`tel:${host.phoneNumber}`} className="flex items-center gap-2 text-sm text-blue-600 hover:underline">
                   📱 {host.phoneNumber}
                 </a>
               )}
+            </CardContent>
+          </Card>
+
+          {/* Danger Zone */}
+          <Card className="border-red-200">
+            <CardHeader>
+              <CardTitle className="text-lg text-red-600">🗑️ Strefa niebezpieczna</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" className="w-full" disabled={isProcessing}>
+                    Usuń profil hosta
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Usunąć profil hosta?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Profil hosta &quot;{host.businessName}&quot; zostanie usunięty. Użytkownik zostanie
+                      zmieniony na gościa. Wszystkie wydarzenia hosta zostaną usunięte.
+                      Ta operacja jest nieodwracalna.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Anuluj</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDeleteHost} className="bg-red-600 hover:bg-red-700">
+                      Tak, usuń profil hosta
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+              <p className="text-xs text-stone-500 mt-2 text-center">
+                Użytkownik nie zostanie usunięty — zmieni się na gościa
+              </p>
             </CardContent>
           </Card>
         </div>

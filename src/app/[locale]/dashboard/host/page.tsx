@@ -101,6 +101,19 @@ export default function HostDashboardPage() {
     }
   }, [isLoading, effectiveRole, router]);
 
+  // Check onboarding status for real hosts
+  useEffect(() => {
+    if (isMockUser || isLoading || effectiveRole === "guest") return;
+    fetch("/api/host/onboarding")
+      .then((res) => res.ok ? res.json() : null)
+      .then((data) => {
+        if (data?.hostProfile && !data.hostProfile.onboardingCompleted) {
+          router.push("/host-onboarding");
+        }
+      })
+      .catch(() => {});
+  }, [isMockUser, isLoading, effectiveRole, router]);
+
   // Fetch events from API for real users
   useEffect(() => {
     if (isMockUser || isLoading || effectiveRole === "guest") return;

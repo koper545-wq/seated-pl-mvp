@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/api/auth";
-import { serverError } from "@/lib/api/errors";
+import { serverError, badRequest } from "@/lib/api/errors";
 import { notifyHostApplicationApproved } from "@/lib/email";
 
 // GET /api/admin/hosts/[id] — get host profile details
@@ -87,7 +87,7 @@ export async function GET(
   }
 }
 
-// PATCH /api/admin/hosts/[id] — toggle verified status
+// PATCH /api/admin/hosts/[id] — update host profile fields
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -98,25 +98,48 @@ export async function PATCH(
 
     const { id } = await params;
     const body = await request.json();
-    const { verified } = body;
+    const { verified, businessName, description, phoneNumber, city, cuisineSpecialties, resendApprovalEmail } = body;
 
-    if (typeof verified !== "boolean") {
-      return NextResponse.json(
-        { error: "verified must be a boolean" },
-        { status: 400 }
-      );
+    // Handle resending approval email
+    if (resendApprovalEmail) {
+      const hostProfile = await db.hostProfile.findUnique({
+        where: { id },
+        include: { user: { select: { email: true } } },
+      });
+      if (!hostProfile) return badRequest("Host not found");
+
+      await notifyHostApplicationApproved({
+        hostEmail: hostProfile.user.email,
+        hostName: hostProfile.businessName,
+        dashboardLink: `${process.env.NEXTAUTH_URL || "https://seated-pl-mvp.vercel.app"}/dashboard/host`,
+      });
+
+      return NextResponse.json({ message: "Approval email resent" });
+    }
+
+    const data: Record<string, unknown> = {};
+
+    if (typeof verified === "boolean") data.verified = verified;
+    if (businessName !== undefined) data.businessName = businessName;
+    if (description !== undefined) data.description = description;
+    if (phoneNumber !== undefined) data.phoneNumber = phoneNumber;
+    if (city !== undefined) data.city = city;
+    if (cuisineSpecialties !== undefined) data.cuisineSpecialties = cuisineSpecialties;
+
+    if (Object.keys(data).length === 0) {
+      return badRequest("No fields to update");
     }
 
     const host = await db.hostProfile.update({
       where: { id },
-      data: { verified },
+      data,
       include: {
         user: { select: { id: true, email: true } },
       },
     });
 
     // Send approval email when host is verified (fire-and-forget)
-    if (verified && host.user.email) {
+    if (typeof verified === "boolean" && verified && host.user.email) {
       notifyHostApplicationApproved({
         hostEmail: host.user.email,
         hostName: host.businessName,
@@ -127,6 +150,58 @@ export async function PATCH(
     return NextResponse.json({ host });
   } catch (error) {
     console.error("PATCH /api/admin/hosts/[id] error:", error);
+    return serverError();
+  }
+}
+
+// DELETE /api/admin/hosts/[id] — delete host profile (demote to guest)
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const result = await requireAdmin();
+    if (result.error) return result.error;
+
+    const { id } = await params;
+
+    const hostProfile = await db.hostProfile.findUnique({
+      where: { id },
+      select: { id: true, userId: true, businessName: true },
+    });
+
+    if (!hostProfile) {
+      return NextResponse.json({ error: "Host not found" }, { status: 404 });
+    }
+
+    // Delete host profile — cascade deletes events
+    await db.hostProfile.delete({ where: { id } });
+
+    // Change user type to GUEST
+    await db.user.update({
+      where: { id: hostProfile.userId },
+      data: { userType: "GUEST" },
+    });
+
+    // Create guest profile if it doesn't exist
+    const existingGuest = await db.guestProfile.findUnique({
+      where: { userId: hostProfile.userId },
+    });
+
+    if (!existingGuest) {
+      await db.guestProfile.create({
+        data: {
+          userId: hostProfile.userId,
+          firstName: hostProfile.businessName,
+        },
+      });
+    }
+
+    return NextResponse.json({
+      message: `Profil hosta "${hostProfile.businessName}" został usunięty. Użytkownik zmieniony na gościa.`,
+    });
+  } catch (error) {
+    console.error("DELETE /api/admin/hosts/[id] error:", error);
     return serverError();
   }
 }

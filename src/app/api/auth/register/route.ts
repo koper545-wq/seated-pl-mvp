@@ -11,7 +11,7 @@ export async function POST(request: Request) {
     const {
       email, password, userType, firstName, lastName,
       businessName, phoneNumber, city, cuisineSpecialties, description,
-      ageVerified,
+      ageVerified, hostSubtype,
     } = body;
 
     // Validation
@@ -71,6 +71,7 @@ export async function POST(request: Request) {
           city: city || "Wroclaw",
           cuisineSpecialties: Array.isArray(cuisineSpecialties) ? cuisineSpecialties : [],
           description: description || null,
+          hostSubtype: hostSubtype || null,
         },
       });
     } else {
