@@ -33,10 +33,15 @@ function LoginForm() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isOAuthLoading, setIsOAuthLoading] = useState<string | null>(null);
+  const [showResendVerification, setShowResendVerification] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendSuccess, setResendSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setShowResendVerification(false);
+    setResendSuccess(false);
     setIsLoading(true);
 
     try {
@@ -49,6 +54,7 @@ function LoginForm() {
       if (result?.error) {
         if (result.error.includes("EMAIL_NOT_VERIFIED")) {
           setError("Najpierw zweryfikuj swój adres email. Sprawdź skrzynkę pocztową.");
+          setShowResendVerification(true);
         } else {
           setError(t("login.errors.invalid"));
         }
@@ -60,6 +66,29 @@ function LoginForm() {
       setError(t("login.errors.generic"));
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    setResendLoading(true);
+    try {
+      const res = await fetch("/api/auth/resend-verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      if (res.ok) {
+        setResendSuccess(true);
+        setShowResendVerification(false);
+        setError("");
+      } else {
+        const data = await res.json();
+        setError(data.error || "Nie udało się wysłać linku. Spróbuj ponownie.");
+      }
+    } catch {
+      setError("Wystąpił błąd. Spróbuj ponownie później.");
+    } finally {
+      setResendLoading(false);
     }
   };
 
@@ -105,9 +134,25 @@ function LoginForm() {
           </div>
         )}
 
+        {resendSuccess && (
+          <div className="p-3 rounded-md bg-green-50 text-green-700 text-sm">
+            Link weryfikacyjny został wysłany! Sprawdź skrzynkę email.
+          </div>
+        )}
+
         {error && (
           <div className="p-3 rounded-md bg-red-50 text-red-700 text-sm">
-            {error}
+            <p>{error}</p>
+            {showResendVerification && (
+              <button
+                type="button"
+                onClick={handleResendVerification}
+                disabled={resendLoading}
+                className="mt-2 text-amber-600 hover:text-amber-700 font-medium underline underline-offset-2 disabled:opacity-50"
+              >
+                {resendLoading ? "Wysyłanie..." : "Wyślij link weryfikacyjny ponownie"}
+              </button>
+            )}
           </div>
         )}
 
