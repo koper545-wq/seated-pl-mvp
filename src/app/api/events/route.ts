@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
       date, startTime, duration, locationPublic, locationFull,
       price, capacity, menuDescription, dietaryOptions,
       byob, ageRequired, dressCode, whatToBring,
-      bookingMode, cancellationPolicy, status,
+      bookingMode, cancellationPolicy, languages, status,
     } = body;
 
     if (!title || !description || !date || !startTime || !price || !capacity) {
@@ -141,7 +141,10 @@ export async function POST(request: NextRequest) {
         whatToBring: whatToBring || null,
         bookingMode: (bookingMode as BookingMode) || BookingMode.MANUAL,
         cancellationPolicy: cancellationPolicy || null,
-        status: status === "PUBLISHED" ? EventStatus.PUBLISHED : EventStatus.DRAFT,
+        languages: languages || ["pl"],
+        status: status === "PUBLISHED" ? EventStatus.PUBLISHED
+          : status === "PENDING_REVIEW" ? EventStatus.PENDING_REVIEW
+          : EventStatus.DRAFT,
       },
       include: {
         host: true,

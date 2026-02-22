@@ -35,11 +35,8 @@ import {
   ArrowRight,
   Calendar as CalendarIcon,
   CheckCircle,
-  Upload,
-  X,
   Plus,
   Info,
-  Eye,
   Save,
   Send,
   Copy,
@@ -56,6 +53,7 @@ import { pl } from "date-fns/locale";
 import { eventLanguages } from "@/lib/mock-data";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useEvents } from "@/contexts/events-context";
+import { ImageUpload } from "@/components/image-upload";
 
 const eventTypes = [
   { value: "supper-club", label: "Supper Club", icon: "🍽️" },
@@ -87,6 +85,21 @@ const timeSlots = [
   "10:00", "11:00", "12:00", "13:00", "14:00", "15:00",
   "16:00", "17:00", "18:00", "18:30", "19:00", "19:30",
   "20:00", "20:30", "21:00",
+];
+
+const dressCodeOptions = [
+  { value: "", label: "Bez wymagań" },
+  { value: "casual", label: "Casual" },
+  { value: "smart-casual", label: "Smart casual" },
+  { value: "elegancki", label: "Elegancki" },
+];
+
+const cancellationPolicyOptions = [
+  { value: "", label: "Brak polityki" },
+  { value: "no-refunds", label: "Brak zwrotów" },
+  { value: "48h-full", label: "Pełny zwrot do 48h przed wydarzeniem" },
+  { value: "7d-full", label: "Pełny zwrot do 7 dni przed wydarzeniem" },
+  { value: "24h-half", label: "Zwrot 50% do 24h przed wydarzeniem" },
 ];
 
 const durationOptions = [
@@ -140,12 +153,15 @@ export default function CreateEventPage() {
   const [capacity, setCapacity] = useState(8);
   const [price, setPrice] = useState(150);
   const [instantBooking, setInstantBooking] = useState(false);
+  const [ageRequired, setAgeRequired] = useState(true);
+  const [dressCode, setDressCode] = useState("");
 
   // Step 4: Menu & dietary
   const [menuDescription, setMenuDescription] = useState("");
   const [selectedDietary, setSelectedDietary] = useState<string[]>([]);
   const [whatToBring, setWhatToBring] = useState("");
   const [byob, setByob] = useState(false);
+  const [cancellationPolicy, setCancellationPolicy] = useState("");
 
   // Step 5: Photos
   const [photos, setPhotos] = useState<string[]>([]);
@@ -264,11 +280,7 @@ export default function CreateEventPage() {
     );
   };
 
-  const simulatePhotoUpload = () => {
-    if (photos.length < 5) {
-      setPhotos([...photos, `photo-${photos.length + 1}`]);
-    }
-  };
+  // Photo upload is now handled by ImageUpload component
 
   const handleSubmit = async (asDraft: boolean = false) => {
     setIsSubmitting(true);
@@ -347,9 +359,13 @@ export default function CreateEventPage() {
             menuDescription,
             dietaryOptions: selectedDietary,
             byob,
+            ageRequired,
+            dressCode: dressCode && dressCode !== "none" ? dressCode : null,
             whatToBring: whatToBring || null,
             bookingMode: instantBooking ? "INSTANT" : "MANUAL",
-            status: asDraft ? "DRAFT" : "DRAFT", // Always draft, admin reviews
+            cancellationPolicy: cancellationPolicy && cancellationPolicy !== "none" ? cancellationPolicy : null,
+            languages: selectedLanguages,
+            status: asDraft ? "DRAFT" : "PENDING_REVIEW",
           }),
         });
 
@@ -951,6 +967,42 @@ export default function CreateEventPage() {
                     </p>
                   </div>
                 </div>
+
+                <Separator />
+
+                <div className="flex items-start space-x-3">
+                  <Checkbox
+                    id="ageRequired"
+                    checked={ageRequired}
+                    onCheckedChange={(checked) =>
+                      setAgeRequired(checked as boolean)
+                    }
+                  />
+                  <div>
+                    <label htmlFor="ageRequired" className="text-sm font-medium cursor-pointer">
+                      Tylko dla pełnoletnich (18+)
+                    </label>
+                    <p className="text-xs text-muted-foreground">
+                      Zaznacz, jeśli wydarzenie wymaga pełnoletności (np. degustacje alkoholu)
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Dress code (opcjonalnie)</Label>
+                  <Select value={dressCode} onValueChange={setDressCode}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Bez wymagań" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {dressCodeOptions.map((opt) => (
+                        <SelectItem key={opt.value || "none"} value={opt.value || "none"}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </CardContent>
             </Card>
           )}
@@ -1022,6 +1074,27 @@ export default function CreateEventPage() {
                     BYOB - goście mogą przynieść własne napoje
                   </label>
                 </div>
+
+                <Separator />
+
+                <div className="space-y-2">
+                  <Label>Polityka anulowania (opcjonalnie)</Label>
+                  <Select value={cancellationPolicy} onValueChange={setCancellationPolicy}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Brak polityki" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {cancellationPolicyOptions.map((opt) => (
+                        <SelectItem key={opt.value || "none"} value={opt.value || "none"}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    Informacja widoczna dla gości na stronie wydarzenia
+                  </p>
+                </div>
               </CardContent>
             </Card>
           )}
@@ -1034,40 +1107,12 @@ export default function CreateEventPage() {
                 <CardDescription>Dodaj min. 1 zdjęcie (max 5)</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {photos.map((photo, index) => (
-                    <div
-                      key={index}
-                      className="aspect-square rounded-lg border-2 border-green-500 bg-green-50 flex items-center justify-center relative"
-                    >
-                      <CheckCircle className="h-8 w-8 text-green-500" />
-                      {index === 0 && (
-                        <Badge className="absolute top-2 left-2 text-xs">
-                          Główne
-                        </Badge>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setPhotos(photos.filter((_, i) => i !== index))
-                        }
-                        className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center"
-                      >
-                        <X className="h-3 w-3 text-white" />
-                      </button>
-                    </div>
-                  ))}
-                  {photos.length < 5 && (
-                    <button
-                      type="button"
-                      onClick={simulatePhotoUpload}
-                      className="aspect-square rounded-lg border-2 border-dashed border-muted-foreground/30 flex flex-col items-center justify-center hover:border-amber-500 hover:bg-amber-50 transition-colors"
-                    >
-                      <Upload className="h-8 w-8 text-muted-foreground/50 mb-2" />
-                      <span className="text-sm text-muted-foreground">Dodaj zdjęcie</span>
-                    </button>
-                  )}
-                </div>
+                <ImageUpload
+                  value={photos}
+                  onChange={setPhotos}
+                  maxFiles={5}
+                  folder="events"
+                />
 
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex gap-3">
                   <Info className="h-5 w-5 text-blue-600 flex-shrink-0" />
