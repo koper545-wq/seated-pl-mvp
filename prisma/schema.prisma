@@ -308,6 +308,20 @@ model Review {
 }
 
 // ============================================
+// EMAIL VERIFICATION
+// ============================================
+
+model VerificationToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  email     String
+  expires   DateTime
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("verification_tokens")
+}
+
+// ============================================
 // GAMIFICATION
 // ============================================
 

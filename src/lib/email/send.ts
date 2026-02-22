@@ -284,6 +284,25 @@ export async function notifyHostApplicationApproved(data: {
 }
 
 // ============================================
+// EMAIL VERIFICATION
+// ============================================
+
+/**
+ * Send email verification link after registration
+ */
+export async function notifyEmailVerification(data: {
+  email: string;
+  verifyUrl: string;
+}) {
+  return sendEmail({
+    to: data.email,
+    template: templates.emailVerification({
+      verifyUrl: data.verifyUrl,
+    }),
+  });
+}
+
+// ============================================
 // WAITLIST EMAIL NOTIFICATIONS
 // ============================================
 

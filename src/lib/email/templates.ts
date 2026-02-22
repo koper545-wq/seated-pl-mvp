@@ -1411,6 +1411,76 @@ Seated Admin Notification System
 }
 
 /**
+ * Email verification - sent after registration with email/password
+ */
+export function emailVerification(data: {
+  verifyUrl: string;
+}): EmailTemplate {
+  return {
+    subject: `Potwierdź swój adres email - Seated`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #1c1917; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #d97706; margin: 0;">🍽️ Seated</h1>
+          </div>
+
+          <div style="background: #fef3c7; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+            <h2 style="margin: 0 0 10px 0; color: #92400e;">📧 Potwierdź swój email</h2>
+            <p style="margin: 0; color: #78716c;">Jeszcze jeden krok do pełnego konta na Seated!</p>
+          </div>
+
+          <p>Cześć! 👋</p>
+
+          <p>Dziękujemy za rejestrację na platformie Seated. Aby aktywować swoje konto, kliknij poniższy przycisk:</p>
+
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${data.verifyUrl}" style="display: inline-block; background: #d97706; color: white; padding: 15px 40px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px;">Potwierdź adres email</a>
+          </div>
+
+          <p style="color: #78716c; font-size: 14px;">Lub skopiuj i wklej ten link do przeglądarki:</p>
+          <p style="color: #78716c; font-size: 12px; word-break: break-all;">${data.verifyUrl}</p>
+
+          <div style="background: #fef3c7; border-radius: 12px; padding: 15px; margin: 20px 0;">
+            <p style="margin: 0; color: #92400e; font-size: 14px;">
+              <strong>⏰ Link wygasa za 24 godziny.</strong><br>
+              Jeśli nie rejestrowałeś/aś się na Seated, zignoruj tego emaila.
+            </p>
+          </div>
+
+          <hr style="border: none; border-top: 1px solid #e7e5e4; margin: 30px 0;">
+
+          <p style="color: #a8a29e; font-size: 12px; text-align: center;">
+            Ten email został wysłany automatycznie przez platformę Seated.<br>
+            © ${new Date().getFullYear()} Seated. Wszystkie prawa zastrzeżone.
+          </p>
+        </body>
+      </html>
+    `,
+    text: `
+Cześć!
+
+POTWIERDŹ SWÓJ EMAIL
+
+Dziękujemy za rejestrację na platformie Seated. Aby aktywować swoje konto, kliknij poniższy link:
+
+${data.verifyUrl}
+
+⏰ Link wygasa za 24 godziny.
+Jeśli nie rejestrowałeś/aś się na Seated, zignoruj tego emaila.
+
+---
+Ten email został wysłany automatycznie przez platformę Seated.
+    `,
+  };
+}
+
+/**
  * Email sent to user when report is resolved
  */
 export function reportResolved(data: {

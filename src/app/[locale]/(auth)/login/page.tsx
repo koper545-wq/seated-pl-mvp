@@ -25,6 +25,8 @@ function LoginForm() {
   const t = useTranslations("auth");
   const callbackUrl = searchParams.get("callbackUrl") || "/";
   const registered = searchParams.get("registered");
+  const verified = searchParams.get("verified");
+  const urlError = searchParams.get("error");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -45,7 +47,11 @@ function LoginForm() {
       });
 
       if (result?.error) {
-        setError(t("login.errors.invalid"));
+        if (result.error.includes("EMAIL_NOT_VERIFIED")) {
+          setError("Najpierw zweryfikuj swój adres email. Sprawdź skrzynkę pocztową.");
+        } else {
+          setError(t("login.errors.invalid"));
+        }
       } else {
         router.push(callbackUrl);
         router.refresh();
@@ -76,8 +82,26 @@ function LoginForm() {
 
       <CardContent className="space-y-4">
         {registered && (
+          <div className="p-3 rounded-md bg-amber-50 text-amber-700 text-sm">
+            Konto utworzone! Sprawdź skrzynkę email i kliknij link weryfikacyjny, aby aktywować konto.
+          </div>
+        )}
+
+        {verified && (
           <div className="p-3 rounded-md bg-green-50 text-green-700 text-sm">
-            {t("login.accountCreated")}
+            Email zweryfikowany! Możesz się teraz zalogować.
+          </div>
+        )}
+
+        {urlError === "expired_token" && (
+          <div className="p-3 rounded-md bg-red-50 text-red-700 text-sm">
+            Link weryfikacyjny wygasł. Zarejestruj się ponownie, aby otrzymać nowy link.
+          </div>
+        )}
+
+        {urlError === "invalid_token" && (
+          <div className="p-3 rounded-md bg-red-50 text-red-700 text-sm">
+            Nieprawidłowy link weryfikacyjny. Spróbuj zarejestrować się ponownie.
           </div>
         )}
 
