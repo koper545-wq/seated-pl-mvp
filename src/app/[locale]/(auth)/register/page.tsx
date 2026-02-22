@@ -19,11 +19,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Loader2, ChefHat, User, Phone } from "lucide-react";
+import { Loader2, ChefHat, User, Phone, Building2 } from "lucide-react";
 import { GoogleIcon, FacebookIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
 type UserType = "GUEST" | "HOST";
+type HostSubtype = "business" | "individual";
 
 const cuisineOptions = [
   { value: "polish", label: "Polska" },
@@ -49,6 +50,7 @@ export default function RegisterPage() {
   const t = useTranslations("auth");
 
   const [userType, setUserType] = useState<UserType>("GUEST");
+  const [hostSubtype, setHostSubtype] = useState<HostSubtype>("business");
 
   // Common fields
   const [email, setEmail] = useState("");
@@ -66,6 +68,8 @@ export default function RegisterPage() {
 
   // Host fields
   const [businessName, setBusinessName] = useState("");
+  const [hostFirstName, setHostFirstName] = useState("");
+  const [hostLastName, setHostLastName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [city] = useState("Wroclaw");
   const [selectedCuisines, setSelectedCuisines] = useState<string[]>([]);
@@ -104,9 +108,16 @@ export default function RegisterPage() {
     }
 
     if (userType === "HOST") {
-      if (!businessName.trim()) {
-        setError("Podaj nazwe firmy / restauracji");
-        return;
+      if (hostSubtype === "business") {
+        if (!businessName.trim()) {
+          setError("Podaj nazwe firmy / restauracji");
+          return;
+        }
+      } else {
+        if (!hostFirstName.trim() || !hostLastName.trim()) {
+          setError("Podaj imie i nazwisko");
+          return;
+        }
       }
       if (!phoneNumber.trim() || phoneNumber.length < 9) {
         setError("Podaj prawidlowy numer telefonu");
@@ -130,11 +141,14 @@ export default function RegisterPage() {
           userType,
           firstName: userType === "GUEST" ? firstName : undefined,
           lastName: userType === "GUEST" ? lastName : undefined,
-          businessName: userType === "HOST" ? businessName : undefined,
+          businessName: userType === "HOST"
+            ? (hostSubtype === "business" ? businessName : `${hostFirstName} ${hostLastName}`)
+            : undefined,
           phoneNumber: userType === "HOST" ? phoneNumber : undefined,
           city: userType === "HOST" ? city : undefined,
           cuisineSpecialties: userType === "HOST" ? selectedCuisines : undefined,
           description: userType === "HOST" && description.trim() ? description : undefined,
+          hostSubtype: userType === "HOST" ? hostSubtype : undefined,
           ageVerified,
         }),
       });
@@ -218,6 +232,40 @@ export default function RegisterPage() {
           </button>
         </div>
 
+        {/* Host Subtype Selector */}
+        {userType === "HOST" && (
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() => setHostSubtype("business")}
+              disabled={isDisabled}
+              className={cn(
+                "flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all",
+                hostSubtype === "business"
+                  ? "border-purple-500 bg-purple-50 text-purple-900"
+                  : "border-stone-200 hover:border-stone-300 text-stone-600"
+              )}
+            >
+              <Building2 className={cn("h-5 w-5", hostSubtype === "business" ? "text-purple-600" : "text-stone-400")} />
+              <span className="font-semibold text-sm">Firma / Restauracja</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setHostSubtype("individual")}
+              disabled={isDisabled}
+              className={cn(
+                "flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all",
+                hostSubtype === "individual"
+                  ? "border-purple-500 bg-purple-50 text-purple-900"
+                  : "border-stone-200 hover:border-stone-300 text-stone-600"
+              )}
+            >
+              <User className={cn("h-5 w-5", hostSubtype === "individual" ? "text-purple-600" : "text-stone-400")} />
+              <span className="font-semibold text-sm">Osoba fizyczna</span>
+            </button>
+          </div>
+        )}
+
         {/* OAuth Buttons - only for guests */}
         {userType === "GUEST" && (
           <>
@@ -300,18 +348,48 @@ export default function RegisterPage() {
           {/* Host: Extended fields */}
           {userType === "HOST" && (
             <>
-              {/* Business name */}
-              <div className="space-y-2">
-                <Label htmlFor="businessName">Nazwa firmy / restauracji *</Label>
-                <Input
-                  id="businessName"
-                  placeholder="np. Trattoria da Marco"
-                  value={businessName}
-                  onChange={(e) => setBusinessName(e.target.value)}
-                  disabled={isDisabled}
-                  required
-                />
-              </div>
+              {/* Business name - for business subtype */}
+              {hostSubtype === "business" && (
+                <div className="space-y-2">
+                  <Label htmlFor="businessName">Nazwa firmy / restauracji *</Label>
+                  <Input
+                    id="businessName"
+                    placeholder="np. Trattoria da Marco"
+                    value={businessName}
+                    onChange={(e) => setBusinessName(e.target.value)}
+                    disabled={isDisabled}
+                    required
+                  />
+                </div>
+              )}
+
+              {/* Name fields - for individual subtype */}
+              {hostSubtype === "individual" && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="hostFirstName">Imie *</Label>
+                    <Input
+                      id="hostFirstName"
+                      placeholder="Jan"
+                      value={hostFirstName}
+                      onChange={(e) => setHostFirstName(e.target.value)}
+                      disabled={isDisabled}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="hostLastName">Nazwisko *</Label>
+                    <Input
+                      id="hostLastName"
+                      placeholder="Kowalski"
+                      value={hostLastName}
+                      onChange={(e) => setHostLastName(e.target.value)}
+                      disabled={isDisabled}
+                      required
+                    />
+                  </div>
+                </div>
+              )}
 
               {/* Phone */}
               <div className="space-y-2">
