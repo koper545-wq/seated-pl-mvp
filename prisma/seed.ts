@@ -133,6 +133,18 @@ async function main() {
     },
   });
 
+  // User 5: Admin
+  const admin = await prisma.user.create({
+    data: {
+      email: "admin@seated.pl",
+      passwordHash,
+      userType: UserType.ADMIN,
+      emailVerified: new Date(),
+      ageVerified: true,
+      language: "pl",
+    },
+  });
+
   // Fetch profiles for relations
   const host1Profile = await prisma.hostProfile.findUnique({ where: { userId: host1.id } });
   const hostGuestProfile = await prisma.hostProfile.findUnique({ where: { userId: hostGuest.id } });
@@ -620,7 +632,7 @@ async function main() {
   console.log("✅ Seed completed!");
   console.log(`
 📊 Created:
-  - 4 users (1 guest, 1 host, 1 both, 1 guest)
+  - 5 users (1 guest, 1 host, 1 both, 1 guest, 1 admin)
   - 2 host profiles
   - 3 guest profiles
   - 6 events (3 published, 1 completed, 1 draft, 1 cancelled)
@@ -634,6 +646,7 @@ async function main() {
   - Host: host@seated.pl / password123
   - Both: both@seated.pl / password123
   - Guest 2: maria@example.com / password123
+  - Admin: admin@seated.pl / password123
 `);
 }
 

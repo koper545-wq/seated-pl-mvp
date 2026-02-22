@@ -1,22 +1,28 @@
-"use client";
+import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { AdminSidebar } from "@/components/admin/admin-sidebar";
 
-import { useRouter } from "@/i18n/navigation";
-import { useEffect } from "react";
-
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const router = useRouter();
+  const session = await auth();
 
-  useEffect(() => {
-    router.push("/");
-  }, [router]);
+  if (!session?.user) {
+    redirect("/login");
+  }
+
+  if ((session.user as { userType?: string }).userType !== "ADMIN") {
+    redirect("/");
+  }
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <p className="text-muted-foreground">Panel admina niedostępny w wersji MVP.</p>
+    <div className="flex min-h-screen bg-stone-50">
+      <AdminSidebar />
+      <main className="flex-1 p-6 md:p-8 md:ml-64">
+        {children}
+      </main>
     </div>
   );
 }

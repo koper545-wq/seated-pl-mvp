@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -17,47 +19,103 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Loader2, ChefHat } from "lucide-react";
+import { Loader2, ChefHat, User, MapPin, Phone } from "lucide-react";
 import { GoogleIcon, FacebookIcon } from "@/components/icons";
+import { cn } from "@/lib/utils";
+
+type UserType = "GUEST" | "HOST";
+
+const cuisineOptions = [
+  { value: "polish", label: "Polska" },
+  { value: "italian", label: "Wloska" },
+  { value: "french", label: "Francuska" },
+  { value: "asian", label: "Azjatycka" },
+  { value: "japanese", label: "Japonska" },
+  { value: "indian", label: "Indyjska" },
+  { value: "mexican", label: "Meksykanska" },
+  { value: "mediterranean", label: "Srodziemnomorska" },
+  { value: "middle-eastern", label: "Bliskowschodnia" },
+  { value: "american", label: "Amerykanska" },
+  { value: "vegan", label: "Weganska" },
+  { value: "vegetarian", label: "Wegetarianska" },
+  { value: "fusion", label: "Fusion" },
+  { value: "pastry", label: "Cukiernictwo" },
+  { value: "wine", label: "Wino i sommelierstwo" },
+  { value: "other", label: "Inna" },
+];
 
 export default function RegisterPage() {
   const router = useRouter();
   const t = useTranslations("auth");
 
+  const [userType, setUserType] = useState<UserType>("GUEST");
+
+  // Common fields
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
   const [ageVerified, setAgeVerified] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isOAuthLoading, setIsOAuthLoading] = useState<string | null>(null);
 
+  // Guest fields
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+
+  // Host fields
+  const [businessName, setBusinessName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [city, setCity] = useState("Wroclaw");
+  const [selectedCuisines, setSelectedCuisines] = useState<string[]>([]);
+  const [description, setDescription] = useState("");
+
+  const handleCuisineToggle = (value: string) => {
+    setSelectedCuisines((prev) =>
+      prev.includes(value)
+        ? prev.filter((c) => c !== value)
+        : [...prev, value]
+    );
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
-    // Validation
     if (password !== confirmPassword) {
       setError(t("register.errors.passwordMismatch"));
       return;
     }
 
     if (password.length < 8) {
-      setError("Hasło musi mieć minimum 8 znaków");
+      setError("Haslo musi miec minimum 8 znakow");
       return;
     }
 
     if (!ageVerified) {
-      setError("Musisz potwierdzić, że masz 18 lat");
+      setError("Musisz potwierdzic, ze masz 18 lat");
       return;
     }
 
     if (!termsAccepted) {
-      setError("Musisz zaakceptować regulamin");
+      setError("Musisz zaakceptowac regulamin");
       return;
+    }
+
+    if (userType === "HOST") {
+      if (!businessName.trim()) {
+        setError("Podaj nazwe firmy / restauracji");
+        return;
+      }
+      if (!phoneNumber.trim() || phoneNumber.length < 9) {
+        setError("Podaj prawidlowy numer telefonu");
+        return;
+      }
+      if (selectedCuisines.length === 0) {
+        setError("Wybierz przynajmniej jeden typ kuchni");
+        return;
+      }
     }
 
     setIsLoading(true);
@@ -69,9 +127,14 @@ export default function RegisterPage() {
         body: JSON.stringify({
           email,
           password,
-          userType: "GUEST",
-          firstName,
-          lastName,
+          userType,
+          firstName: userType === "GUEST" ? firstName : undefined,
+          lastName: userType === "GUEST" ? lastName : undefined,
+          businessName: userType === "HOST" ? businessName : undefined,
+          phoneNumber: userType === "HOST" ? phoneNumber : undefined,
+          city: userType === "HOST" ? city : undefined,
+          cuisineSpecialties: userType === "HOST" ? selectedCuisines : undefined,
+          description: userType === "HOST" && description.trim() ? description : undefined,
           ageVerified,
         }),
       });
@@ -83,7 +146,6 @@ export default function RegisterPage() {
         return;
       }
 
-      // Redirect to login with success message
       router.push("/login?registered=true");
     } catch {
       setError(t("register.errors.generic"));
@@ -102,8 +164,10 @@ export default function RegisterPage() {
     }
   };
 
+  const isDisabled = isLoading || isOAuthLoading !== null;
+
   return (
-    <Card className="w-full max-w-md">
+    <Card className={cn("w-full", userType === "HOST" ? "max-w-lg" : "max-w-md")}>
       <CardHeader className="text-center">
         <CardTitle className="text-2xl">{t("register.title")}</CardTitle>
         <CardDescription>{t("register.subtitle")}</CardDescription>
@@ -116,78 +180,209 @@ export default function RegisterPage() {
           </div>
         )}
 
-        {/* OAuth Buttons */}
-        <div className="space-y-3">
-          <Button
+        {/* User Type Selector */}
+        <div className="grid grid-cols-2 gap-3">
+          <button
             type="button"
-            variant="outline"
-            className="w-full"
-            onClick={() => handleOAuthSignIn("google")}
-            disabled={isLoading || isOAuthLoading !== null}
-          >
-            {isOAuthLoading === "google" ? (
-              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-            ) : (
-              <GoogleIcon className="mr-2 h-5 w-5" />
+            onClick={() => setUserType("GUEST")}
+            disabled={isDisabled}
+            className={cn(
+              "flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all",
+              userType === "GUEST"
+                ? "border-amber-500 bg-amber-50 text-amber-900"
+                : "border-stone-200 hover:border-stone-300 text-stone-600"
             )}
-            {t("continueWithGoogle")}
-          </Button>
-          <Button
+          >
+            <User className={cn("h-6 w-6", userType === "GUEST" ? "text-amber-600" : "text-stone-400")} />
+            <span className="font-semibold text-sm">Gosc</span>
+            <span className="text-xs text-center leading-tight opacity-75">
+              Chce brac udzial w wydarzeniach
+            </span>
+          </button>
+          <button
             type="button"
-            variant="outline"
-            className="w-full"
-            onClick={() => handleOAuthSignIn("facebook")}
-            disabled={isLoading || isOAuthLoading !== null}
-          >
-            {isOAuthLoading === "facebook" ? (
-              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-            ) : (
-              <FacebookIcon className="mr-2 h-5 w-5" />
+            onClick={() => setUserType("HOST")}
+            disabled={isDisabled}
+            className={cn(
+              "flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all",
+              userType === "HOST"
+                ? "border-amber-500 bg-amber-50 text-amber-900"
+                : "border-stone-200 hover:border-stone-300 text-stone-600"
             )}
-            {t("continueWithFacebook")}
-          </Button>
+          >
+            <ChefHat className={cn("h-6 w-6", userType === "HOST" ? "text-amber-600" : "text-stone-400")} />
+            <span className="font-semibold text-sm">Host</span>
+            <span className="text-xs text-center leading-tight opacity-75">
+              Chce organizowac wydarzenia
+            </span>
+          </button>
         </div>
 
-        {/* Divider */}
-        <div className="relative my-6">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">
-              {t("orDivider")}
-            </span>
-          </div>
-        </div>
+        {/* OAuth Buttons - only for guests */}
+        {userType === "GUEST" && (
+          <>
+            <div className="space-y-3">
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={() => handleOAuthSignIn("google")}
+                disabled={isDisabled}
+              >
+                {isOAuthLoading === "google" ? (
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                ) : (
+                  <GoogleIcon className="mr-2 h-5 w-5" />
+                )}
+                {t("continueWithGoogle")}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={() => handleOAuthSignIn("facebook")}
+                disabled={isDisabled}
+              >
+                {isOAuthLoading === "facebook" ? (
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                ) : (
+                  <FacebookIcon className="mr-2 h-5 w-5" />
+                )}
+                {t("continueWithFacebook")}
+              </Button>
+            </div>
+
+            {/* Divider */}
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  {t("orDivider")}
+                </span>
+              </div>
+            </div>
+          </>
+        )}
 
         {/* Email/Password Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
 
-          {/* Name fields */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="firstName">{t("register.firstName")} *</Label>
-              <Input
-                id="firstName"
-                placeholder="Jan"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                disabled={isLoading || isOAuthLoading !== null}
-                required
-              />
+          {/* Guest: Name fields */}
+          {userType === "GUEST" && (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="firstName">{t("register.firstName")} *</Label>
+                <Input
+                  id="firstName"
+                  placeholder="Jan"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  disabled={isDisabled}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="lastName">{t("register.lastName")} *</Label>
+                <Input
+                  id="lastName"
+                  placeholder="Kowalski"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  disabled={isDisabled}
+                  required
+                />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="lastName">{t("register.lastName")} *</Label>
-              <Input
-                id="lastName"
-                placeholder="Kowalski"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                disabled={isLoading || isOAuthLoading !== null}
-                required
-              />
-            </div>
-          </div>
+          )}
+
+          {/* Host: Extended fields */}
+          {userType === "HOST" && (
+            <>
+              {/* Business name */}
+              <div className="space-y-2">
+                <Label htmlFor="businessName">Nazwa firmy / restauracji *</Label>
+                <Input
+                  id="businessName"
+                  placeholder="np. Trattoria da Marco"
+                  value={businessName}
+                  onChange={(e) => setBusinessName(e.target.value)}
+                  disabled={isDisabled}
+                  required
+                />
+              </div>
+
+              {/* Phone & City */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="phoneNumber">
+                    <Phone className="inline h-3.5 w-3.5 mr-1" />
+                    Telefon *
+                  </Label>
+                  <Input
+                    id="phoneNumber"
+                    type="tel"
+                    placeholder="+48 123 456 789"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    disabled={isDisabled}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="city">
+                    <MapPin className="inline h-3.5 w-3.5 mr-1" />
+                    Miasto *
+                  </Label>
+                  <Input
+                    id="city"
+                    placeholder="Wroclaw"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    disabled={isDisabled}
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Cuisine specialties */}
+              <div className="space-y-2">
+                <Label>Typ kuchni *</Label>
+                <div className="flex flex-wrap gap-1.5">
+                  {cuisineOptions.map((cuisine) => (
+                    <Badge
+                      key={cuisine.value}
+                      variant={selectedCuisines.includes(cuisine.value) ? "default" : "outline"}
+                      className={cn(
+                        "cursor-pointer transition-all text-xs",
+                        selectedCuisines.includes(cuisine.value)
+                          ? "bg-amber-600 hover:bg-amber-700"
+                          : "hover:bg-amber-50"
+                      )}
+                      onClick={() => !isDisabled && handleCuisineToggle(cuisine.value)}
+                    >
+                      {cuisine.label}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              {/* Description */}
+              <div className="space-y-2">
+                <Label htmlFor="description">Krotki opis</Label>
+                <Textarea
+                  id="description"
+                  placeholder="Opowiedz o sobie i swoich wydarzeniach..."
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  disabled={isDisabled}
+                  rows={3}
+                  className="resize-none"
+                />
+              </div>
+            </>
+          )}
 
           {/* Email */}
           <div className="space-y-2">
@@ -199,7 +394,7 @@ export default function RegisterPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              disabled={isLoading || isOAuthLoading !== null}
+              disabled={isDisabled}
             />
           </div>
 
@@ -209,11 +404,11 @@ export default function RegisterPage() {
             <Input
               id="password"
               type="password"
-              placeholder="Minimum 8 znaków"
+              placeholder="Minimum 8 znakow"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              disabled={isLoading || isOAuthLoading !== null}
+              disabled={isDisabled}
             />
           </div>
 
@@ -222,11 +417,11 @@ export default function RegisterPage() {
             <Input
               id="confirmPassword"
               type="password"
-              placeholder="Powtórz hasło"
+              placeholder="Powtorz haslo"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
-              disabled={isLoading || isOAuthLoading !== null}
+              disabled={isDisabled}
             />
           </div>
 
@@ -237,10 +432,10 @@ export default function RegisterPage() {
                 id="age"
                 checked={ageVerified}
                 onCheckedChange={(checked) => setAgeVerified(checked === true)}
-                disabled={isLoading || isOAuthLoading !== null}
+                disabled={isDisabled}
               />
               <Label htmlFor="age" className="text-sm font-normal leading-tight">
-                Potwierdzam, że mam ukończone 18 lat *
+                Potwierdzam, ze mam ukonczone 18 lat *
               </Label>
             </div>
 
@@ -249,16 +444,16 @@ export default function RegisterPage() {
                 id="terms"
                 checked={termsAccepted}
                 onCheckedChange={(checked) => setTermsAccepted(checked === true)}
-                disabled={isLoading || isOAuthLoading !== null}
+                disabled={isDisabled}
               />
               <Label htmlFor="terms" className="text-sm font-normal leading-tight">
-                Akceptuję{" "}
+                Akceptuje{" "}
                 <Link href="/terms" className="text-amber-600 hover:underline">
                   regulamin
                 </Link>{" "}
                 i{" "}
                 <Link href="/privacy" className="text-amber-600 hover:underline">
-                  politykę prywatności
+                  polityke prywatnosci
                 </Link>{" "}
                 *
               </Label>
@@ -268,13 +463,15 @@ export default function RegisterPage() {
           <Button
             type="submit"
             className="w-full bg-amber-600 hover:bg-amber-700"
-            disabled={isLoading || isOAuthLoading !== null}
+            disabled={isDisabled}
           >
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 {t("register.submitting")}
               </>
+            ) : userType === "HOST" ? (
+              "Stworz konto hosta"
             ) : (
               t("register.submit")
             )}
@@ -292,17 +489,6 @@ export default function RegisterPage() {
             {t("register.login")}
           </Link>
         </p>
-
-        {/* Host CTA */}
-        <div className="mt-2 pt-4 border-t w-full">
-          <Link
-            href="/become-host"
-            className="flex items-center justify-center gap-2 w-full p-3 rounded-lg bg-amber-50 hover:bg-amber-100 transition-colors text-amber-700 text-sm font-medium"
-          >
-            <ChefHat className="h-4 w-4" />
-            Chcesz zostać hostem? Złóż aplikację
-          </Link>
-        </div>
       </CardFooter>
     </Card>
   );

@@ -1,18 +1,11 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useState, useEffect } from "react";
 import { Link } from "@/i18n/navigation";
 import { format } from "date-fns";
 import { pl } from "date-fns/locale";
-import {
-  getAdminUserById,
-  userRoleLabels,
-  getBookingsByGuestId,
-  bookingStatusLabels,
-} from "@/lib/mock-data";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -32,29 +25,118 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
+interface UserDetail {
+  id: string;
+  email: string;
+  userType: string;
+  status: string;
+  emailVerified: string | null;
+  createdAt: string;
+  guestProfile: { firstName: string; lastName: string; xp: number } | null;
+  hostProfile: {
+    id: string;
+    businessName: string;
+    verified: boolean;
+    city: string;
+    events: { id: string; title: string; status: string; date: string; price: number }[];
+  } | null;
+  bookings: {
+    id: string;
+    status: string;
+    ticketCount: number;
+    totalPrice: number;
+    createdAt: string;
+    event: { id: string; title: string; date: string; price: number; locationPublic: string };
+  }[];
+}
+
+const roleLabels: Record<string, { label: string; color: string }> = {
+  GUEST: { label: "Gość", color: "bg-stone-100 text-stone-700" },
+  HOST: { label: "Host", color: "bg-amber-100 text-amber-700" },
+  ADMIN: { label: "Admin", color: "bg-purple-100 text-purple-700" },
+};
+
+const bookingStatusLabels: Record<string, { label: string; color: string }> = {
+  PENDING: { label: "Oczekuje", color: "bg-yellow-100 text-yellow-700" },
+  APPROVED: { label: "Potwierdzona", color: "bg-green-100 text-green-700" },
+  DECLINED: { label: "Odrzucona", color: "bg-red-100 text-red-700" },
+  CANCELLED: { label: "Anulowana", color: "bg-stone-100 text-stone-700" },
+  COMPLETED: { label: "Zakończona", color: "bg-blue-100 text-blue-700" },
+  NO_SHOW: { label: "Nieobecny", color: "bg-red-100 text-red-700" },
+};
+
 export default function AdminUserDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const user = getAdminUserById(id);
-  const bookings = user ? getBookingsByGuestId(user.id) : [];
-
-  const [adminNotes, setAdminNotes] = useState("");
+  const [user, setUser] = useState<UserDetail | null>(null);
+  const [loading, setLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
+
+  useEffect(() => {
+    fetch(`/api/admin/users/${id}`)
+      .then((res) => res.json())
+      .then((data) => setUser(data.user))
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, [id]);
+
+  const handleStatusChange = async (newStatus: string) => {
+    setIsProcessing(true);
+    try {
+      const res = await fetch(`/api/admin/users/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setUser((prev) => prev ? { ...prev, status: data.user.status } : prev);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleRoleChange = async (newRole: string) => {
+    setIsProcessing(true);
+    try {
+      const res = await fetch(`/api/admin/users/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userType: newRole }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setUser((prev) => prev ? { ...prev, userType: data.user.userType } : prev);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="max-w-5xl mx-auto">
+        <Card className="p-8 text-center">
+          <p className="text-stone-500">Ładowanie...</p>
+        </Card>
+      </div>
+    );
+  }
 
   if (!user) {
     return (
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-5xl mx-auto">
         <Card className="p-8 text-center">
           <span className="text-6xl mb-4 block">🔍</span>
-          <h1 className="text-xl font-bold text-stone-900 mb-2">
-            Nie znaleziono użytkownika
-          </h1>
-          <p className="text-stone-500 mb-6">
-            Użytkownik o podanym ID nie istnieje
-          </p>
+          <h1 className="text-xl font-bold text-stone-900 mb-2">Nie znaleziono użytkownika</h1>
           <Link href="/admin/users">
             <Button>Wróć do listy</Button>
           </Link>
@@ -63,33 +145,10 @@ export default function AdminUserDetailPage({
     );
   }
 
-  const handleBlock = async () => {
-    setIsProcessing(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    alert("Użytkownik zablokowany! (demo)");
-    setIsProcessing(false);
-  };
-
-  const handleUnblock = async () => {
-    setIsProcessing(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    alert("Użytkownik odblokowany! (demo)");
-    setIsProcessing(false);
-  };
-
-  const handleDelete = async () => {
-    setIsProcessing(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    alert("Użytkownik usunięty! (demo)");
-    setIsProcessing(false);
-  };
-
-  const handleRoleChange = async (newRole: string) => {
-    setIsProcessing(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    alert(`Rola zmieniona na: ${newRole}! (demo)`);
-    setIsProcessing(false);
-  };
+  const name = user.guestProfile
+    ? `${user.guestProfile.firstName} ${user.guestProfile.lastName}`
+    : user.hostProfile?.businessName || user.email;
+  const rl = roleLabels[user.userType] || roleLabels.GUEST;
 
   return (
     <div className="max-w-5xl mx-auto">
@@ -97,87 +156,50 @@ export default function AdminUserDetailPage({
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Link href="/admin/users">
-            <Button variant="ghost" size="sm">
-              ← Wróć
-            </Button>
+            <Button variant="ghost" size="sm">← Wróć</Button>
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-stone-900">
-              {user.firstName} {user.lastName}
-            </h1>
+            <h1 className="text-2xl font-bold text-stone-900">{name}</h1>
             <p className="text-stone-500">{user.email}</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <span
-            className={`px-4 py-2 rounded-full text-sm font-medium ${
-              userRoleLabels[user.role].color
-            }`}
-          >
-            {userRoleLabels[user.role].label}
-          </span>
-          {!user.isActive && (
-            <span className="px-4 py-2 rounded-full text-sm font-medium bg-red-100 text-red-700">
-              Zablokowany
-            </span>
+          <span className={`px-4 py-2 rounded-full text-sm font-medium ${rl.color}`}>{rl.label}</span>
+          {user.status !== "ACTIVE" && (
+            <span className="px-4 py-2 rounded-full text-sm font-medium bg-red-100 text-red-700">{user.status}</span>
           )}
         </div>
       </div>
 
       <div className="grid md:grid-cols-3 gap-6">
-        {/* Main Content */}
         <div className="md:col-span-2 space-y-6">
-          {/* Profile Card */}
+          {/* Profile */}
           <Card>
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
-                <span>👤</span> Profil użytkownika
+                <span>👤</span> Profil
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex items-start gap-6">
-                <div
-                  className={`w-24 h-24 rounded-full flex items-center justify-center text-4xl ${
-                    user.role === "host"
-                      ? "bg-amber-100"
-                      : user.role === "admin"
-                      ? "bg-purple-100"
-                      : "bg-stone-100"
-                  }`}
-                >
-                  {user.avatar ||
-                    (user.role === "host"
-                      ? "👨‍🍳"
-                      : user.role === "admin"
-                      ? "👑"
-                      : "👤")}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs text-stone-400 uppercase">Email</p>
+                  <p className="text-stone-900">{user.email}</p>
                 </div>
-                <div className="flex-1 grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-xs text-stone-400 uppercase tracking-wide">
-                      Imię
-                    </p>
-                    <p className="text-stone-900">{user.firstName}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-stone-400 uppercase tracking-wide">
-                      Nazwisko
-                    </p>
-                    <p className="text-stone-900">{user.lastName}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-stone-400 uppercase tracking-wide">
-                      Email
-                    </p>
-                    <p className="text-stone-900">{user.email}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-stone-400 uppercase tracking-wide">
-                      Miasto
-                    </p>
-                    <p className="text-stone-900">{user.city}</p>
-                  </div>
+                <div>
+                  <p className="text-xs text-stone-400 uppercase">Weryfikacja email</p>
+                  <p className="text-stone-900">{user.emailVerified ? "✓ Zweryfikowany" : "○ Nie"}</p>
                 </div>
+                <div>
+                  <p className="text-xs text-stone-400 uppercase">Dołączył</p>
+                  <p className="text-stone-900">{format(new Date(user.createdAt), "d MMM yyyy", { locale: pl })}</p>
+                </div>
+                {user.hostProfile && (
+                  <div>
+                    <p className="text-xs text-stone-400 uppercase">Miasto</p>
+                    <p className="text-stone-900">{user.hostProfile.city}</p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -192,69 +214,29 @@ export default function AdminUserDetailPage({
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="text-center p-4 bg-stone-50 rounded-lg">
-                  <p className="text-xs text-stone-400 uppercase tracking-wide mb-1">
-                    Dołączył
-                  </p>
+                  <p className="text-xs text-stone-400 uppercase mb-1">Dołączył</p>
                   <p className="font-medium text-stone-900">
-                    {format(user.createdAt, "d MMM yyyy", { locale: pl })}
+                    {format(new Date(user.createdAt), "d MMM yyyy", { locale: pl })}
                   </p>
                 </div>
-                <div className="text-center p-4 bg-stone-50 rounded-lg">
-                  <p className="text-xs text-stone-400 uppercase tracking-wide mb-1">
-                    Ostatnio aktywny
-                  </p>
-                  <p className="font-medium text-stone-900">
-                    {user.lastLoginAt
-                      ? format(user.lastLoginAt, "d MMM yyyy", { locale: pl })
-                      : "Nigdy"}
-                  </p>
-                </div>
-                {user.role === "host" && (
-                  <>
-                    <div className="text-center p-4 bg-amber-50 rounded-lg">
-                      <p className="text-xs text-amber-600 uppercase tracking-wide mb-1">
-                        Wydarzenia
-                      </p>
-                      <p className="font-bold text-amber-700 text-xl">
-                        {user.eventsHosted || 0}
-                      </p>
-                    </div>
-                    <div className="text-center p-4 bg-green-50 rounded-lg">
-                      <p className="text-xs text-green-600 uppercase tracking-wide mb-1">
-                        Przychód
-                      </p>
-                      <p className="font-bold text-green-700 text-xl">
-                        {((user.totalRevenue || 0) / 100).toLocaleString()} zł
-                      </p>
-                    </div>
-                  </>
+                {user.userType === "HOST" && user.hostProfile && (
+                  <div className="text-center p-4 bg-amber-50 rounded-lg">
+                    <p className="text-xs text-amber-600 uppercase mb-1">Wydarzenia</p>
+                    <p className="font-bold text-amber-700 text-xl">{user.hostProfile.events.length}</p>
+                  </div>
                 )}
-                {user.role === "guest" && (
-                  <>
-                    <div className="text-center p-4 bg-blue-50 rounded-lg">
-                      <p className="text-xs text-blue-600 uppercase tracking-wide mb-1">
-                        Uczestnictwo
-                      </p>
-                      <p className="font-bold text-blue-700 text-xl">
-                        {user.eventsAttended || 0}
-                      </p>
-                    </div>
-                    <div className="text-center p-4 bg-purple-50 rounded-lg">
-                      <p className="text-xs text-purple-600 uppercase tracking-wide mb-1">
-                        Rezerwacje
-                      </p>
-                      <p className="font-bold text-purple-700 text-xl">
-                        {bookings.length}
-                      </p>
-                    </div>
-                  </>
+                {user.userType === "GUEST" && (
+                  <div className="text-center p-4 bg-blue-50 rounded-lg">
+                    <p className="text-xs text-blue-600 uppercase mb-1">Rezerwacje</p>
+                    <p className="font-bold text-blue-700 text-xl">{user.bookings.length}</p>
+                  </div>
                 )}
               </div>
             </CardContent>
           </Card>
 
-          {/* Bookings (for guests) */}
-          {user.role === "guest" && bookings.length > 0 && (
+          {/* Bookings */}
+          {user.bookings.length > 0 && (
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
@@ -263,46 +245,26 @@ export default function AdminUserDetailPage({
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {bookings.map((booking) => (
-                    <div
-                      key={booking.id}
-                      className="flex items-center justify-between p-4 bg-stone-50 rounded-lg"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={`w-12 h-12 rounded-lg bg-gradient-to-br ${booking.event.imageGradient} flex items-center justify-center text-xl`}
-                        >
-                          🍴
-                        </div>
+                  {user.bookings.map((booking) => {
+                    const bs = bookingStatusLabels[booking.status] || bookingStatusLabels.PENDING;
+                    return (
+                      <div key={booking.id} className="flex items-center justify-between p-4 bg-stone-50 rounded-lg">
                         <div>
-                          <p className="font-medium text-stone-900">
-                            {booking.event.title}
-                          </p>
+                          <p className="font-medium text-stone-900">{booking.event.title}</p>
                           <p className="text-xs text-stone-500">
-                            {booking.event.dateFormatted}
+                            {format(new Date(booking.event.date), "d MMM yyyy", { locale: pl })} · {booking.event.locationPublic}
                           </p>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <div className="text-right">
-                          <p className="text-sm font-medium">
-                            {(booking.totalPrice / 100).toLocaleString()} zł
-                          </p>
-                          <p className="text-xs text-stone-500">
-                            {booking.ticketCount} bilet
-                            {booking.ticketCount > 1 ? "y" : ""}
-                          </p>
+                        <div className="flex items-center gap-4">
+                          <div className="text-right">
+                            <p className="text-sm font-medium">{(booking.totalPrice / 100).toLocaleString()} zł</p>
+                            <p className="text-xs text-stone-500">{booking.ticketCount} bilet{booking.ticketCount > 1 ? "y" : ""}</p>
+                          </div>
+                          <span className={`px-2 py-1 rounded-full text-xs ${bs.color}`}>{bs.label}</span>
                         </div>
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs ${
-                            bookingStatusLabels[booking.status].color
-                          }`}
-                        >
-                          {bookingStatusLabels[booking.status].label}
-                        </span>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
@@ -311,187 +273,62 @@ export default function AdminUserDetailPage({
 
         {/* Sidebar */}
         <div className="space-y-6">
-          {/* Status */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">📋 Status</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-stone-500">Weryfikacja</span>
-                {user.isVerified ? (
-                  <span className="text-green-600 font-medium">
-                    ✓ Zweryfikowany
-                  </span>
-                ) : (
-                  <span className="text-yellow-600 font-medium">
-                    ○ Niezweryfikowany
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-stone-500">Konto</span>
-                {user.isActive ? (
-                  <span className="text-blue-600 font-medium">● Aktywne</span>
-                ) : (
-                  <span className="text-red-600 font-medium">○ Zablokowane</span>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Role Management */}
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">👥 Rola</CardTitle>
             </CardHeader>
             <CardContent>
               <Select
-                defaultValue={user.role}
+                defaultValue={user.userType}
                 onValueChange={handleRoleChange}
-                disabled={user.role === "admin"}
+                disabled={user.userType === "ADMIN" || isProcessing}
               >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="guest">Gość</SelectItem>
-                  <SelectItem value="host">Host</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="GUEST">Gość</SelectItem>
+                  <SelectItem value="HOST">Host</SelectItem>
+                  <SelectItem value="ADMIN">Admin</SelectItem>
                 </SelectContent>
               </Select>
-              {user.role === "admin" && (
-                <p className="text-xs text-stone-500 mt-2">
-                  Nie można zmienić roli admina
-                </p>
-              )}
             </CardContent>
           </Card>
 
-          {/* Admin Notes */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">📝 Notatki</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Textarea
-                value={adminNotes}
-                onChange={(e) => setAdminNotes(e.target.value)}
-                placeholder="Dodaj notatki o użytkowniku..."
-                rows={4}
-              />
-              <Button className="w-full mt-3" variant="outline" size="sm">
-                Zapisz notatkę
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Actions */}
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">⚡ Akcje</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {user.role === "guest" && (
-                <Link href={`/profile/${user.id}`} target="_blank">
-                  <Button className="w-full" variant="outline">
-                    👁️ Zobacz profil publiczny
-                  </Button>
-                </Link>
-              )}
-
-              {!user.isVerified && (
-                <Button className="w-full bg-green-600 hover:bg-green-700">
-                  ✓ Zweryfikuj email
-                </Button>
-              )}
-
-              {user.isActive ? (
+              {user.status === "ACTIVE" ? (
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button
-                      className="w-full"
-                      variant="destructive"
-                      disabled={isProcessing || user.role === "admin"}
-                    >
-                      🚫 Zablokuj użytkownika
+                    <Button className="w-full" variant="destructive" disabled={isProcessing || user.userType === "ADMIN"}>
+                      🚫 Zablokuj
                     </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
-                      <AlertDialogTitle>
-                        Zablokować użytkownika?
-                      </AlertDialogTitle>
+                      <AlertDialogTitle>Zablokować użytkownika?</AlertDialogTitle>
                       <AlertDialogDescription>
-                        {user.firstName} {user.lastName} nie będzie mógł się
-                        zalogować ani korzystać z platformy.
+                        {name} nie będzie mógł się zalogować.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel>Anuluj</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={handleBlock}
-                        className="bg-red-600 hover:bg-red-700"
-                      >
+                      <AlertDialogAction onClick={() => handleStatusChange("SUSPENDED")} className="bg-red-600 hover:bg-red-700">
                         Tak, zablokuj
                       </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
               ) : (
-                <Button
-                  className="w-full bg-green-600 hover:bg-green-700"
-                  onClick={handleUnblock}
-                  disabled={isProcessing}
-                >
-                  ✓ Odblokuj użytkownika
+                <Button className="w-full bg-green-600 hover:bg-green-700" onClick={() => handleStatusChange("ACTIVE")} disabled={isProcessing}>
+                  ✓ Odblokuj
                 </Button>
               )}
 
-              <hr className="my-2" />
-
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    className="w-full"
-                    variant="outline"
-                    disabled={isProcessing || user.role === "admin"}
-                  >
-                    🗑️ Usuń konto
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Usunąć konto?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Ta akcja jest nieodwracalna. Wszystkie dane użytkownika{" "}
-                      {user.firstName} {user.lastName} zostaną trwale usunięte.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Anuluj</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={handleDelete}
-                      className="bg-red-600 hover:bg-red-700"
-                    >
-                      Tak, usuń konto
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </CardContent>
-          </Card>
-
-          {/* Contact */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">📞 Kontakt</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <a
-                href={`mailto:${user.email}`}
-                className="flex items-center gap-2 text-sm text-blue-600 hover:underline"
-              >
+              <a href={`mailto:${user.email}`} className="flex items-center gap-2 text-sm text-blue-600 hover:underline mt-4">
                 ✉️ Wyślij email
               </a>
             </CardContent>

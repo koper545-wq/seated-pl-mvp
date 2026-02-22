@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,13 +17,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+// Select removed - not needed in MVP become-host form
 import { Separator } from "@/components/ui/separator";
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
@@ -54,10 +49,9 @@ const eventTypeKeys = [
   "supper-club", "cooking-class", "tasting", "popup", "active-food"
 ];
 
-const neighborhoodKeys = [
-  "stare-miasto", "nadodrze", "srodmiescie", "krzyki",
-  "fabryczna", "psie-pole", "biskupin", "olbin", "other"
-];
+// neighborhoodKeys removed in MVP
+
+const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
 
 const timeSlots = [
   "09:00", "10:00", "11:00", "12:00", "13:00", "14:00",
@@ -67,8 +61,16 @@ const timeSlots = [
 export default function BecomeHostPage() {
   const t = useTranslations("becomeHostPage");
   const router = useRouter();
+  const { data: session, status: sessionStatus } = useSession();
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (sessionStatus === "unauthenticated") {
+      router.push("/login?callbackUrl=/become-host");
+    }
+  }, [sessionStatus, router]);
 
   // Host type selection
   const [hostType, setHostType] = useState<"individual" | "restaurant">("individual");
@@ -76,7 +78,6 @@ export default function BecomeHostPage() {
   // Step 1: Personal info (for individual)
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [birthDate, setBirthDate] = useState("");
 
@@ -90,25 +91,29 @@ export default function BecomeHostPage() {
   const [contactPosition, setContactPosition] = useState("");
 
   // Step 4: Logo (for restaurant)
-  const [logo, setLogo] = useState<string | null>(null);
+  const [logo, setLogo] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
   // Step 2: Address
   const [street, setStreet] = useState("");
   const [apartment, setApartment] = useState("");
   const [city, setCity] = useState("Wrocław");
   const [postalCode, setPostalCode] = useState("");
-  const [neighborhood, setNeighborhood] = useState("");
 
   // Step 3: Experience & cuisine
   const [hasExperience, setHasExperience] = useState<string>("");
   const [experienceDetails, setExperienceDetails] = useState("");
   const [selectedCuisines, setSelectedCuisines] = useState<string[]>([]);
+  const [customCuisine, setCustomCuisine] = useState("");
   const [selectedEventTypes, setSelectedEventTypes] = useState<string[]>([]);
   const [bio, setBio] = useState("");
 
-  // Step 4: Photos (simulated)
-  const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
-  const [foodPhotos, setFoodPhotos] = useState<string[]>([]);
+  // Step 4: Photos
+  const [profilePhoto, setProfilePhoto] = useState<File | null>(null);
+  const [profilePhotoPreview, setProfilePhotoPreview] = useState<string | null>(null);
+  const [foodPhotos, setFoodPhotos] = useState<File[]>([]);
+  const [foodPhotoPreviews, setFoodPhotoPreviews] = useState<string[]>([]);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   // Step 5: Availability
   const [selectedDates, setSelectedDates] = useState<Date[]>([]);
@@ -122,7 +127,6 @@ export default function BecomeHostPage() {
   const isStep1Valid = hostType === "individual"
     ? (firstName.length >= 2 &&
        lastName.length >= 2 &&
-       email.includes("@") &&
        phone.length >= 9 &&
        birthDate)
     : (restaurantName.length >= 2 &&
@@ -133,8 +137,7 @@ export default function BecomeHostPage() {
   const isStep2Valid =
     street.length >= 3 &&
     city.length >= 2 &&
-    postalCode.length >= 5 &&
-    neighborhood;
+    postalCode.length >= 5;
 
   const isStep3Valid =
     hasExperience !== "" &&
@@ -193,17 +196,44 @@ export default function BecomeHostPage() {
     );
   };
 
-  const simulatePhotoUpload = (type: "profile" | "food" | "logo") => {
-    // Simulate upload with placeholder
-    if (type === "profile") {
-      setProfilePhoto("uploaded");
-    } else if (type === "logo") {
-      setLogo("uploaded");
-    } else {
-      if (foodPhotos.length < 5) {
-        setFoodPhotos([...foodPhotos, `food-${foodPhotos.length + 1}`]);
+  const handleFileSelect = (type: "profile" | "food" | "logo") => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+
+      setUploadError(null);
+
+      if (file.size > MAX_FILE_SIZE) {
+        setUploadError("Plik jest za duży. Maksymalny rozmiar to 2 MB.");
+        return;
       }
-    }
+
+      if (!file.type.startsWith("image/")) {
+        setUploadError("Dozwolone są tylko pliki graficzne (JPG, PNG, WebP).");
+        return;
+      }
+
+      const previewUrl = URL.createObjectURL(file);
+
+      if (type === "profile") {
+        if (profilePhotoPreview) URL.revokeObjectURL(profilePhotoPreview);
+        setProfilePhoto(file);
+        setProfilePhotoPreview(previewUrl);
+      } else if (type === "logo") {
+        if (logoPreview) URL.revokeObjectURL(logoPreview);
+        setLogo(file);
+        setLogoPreview(previewUrl);
+      } else {
+        if (foodPhotos.length < 5) {
+          setFoodPhotos([...foodPhotos, file]);
+          setFoodPhotoPreviews([...foodPhotoPreviews, previewUrl]);
+        }
+      }
+    };
+    input.click();
   };
 
   const handleSubmit = async () => {
@@ -215,6 +245,11 @@ export default function BecomeHostPage() {
       const businessNameValue = hostType === "restaurant" ? restaurantName : `${firstName} ${lastName}`;
       const phoneValue = hostType === "restaurant" ? contactPhone : phone;
 
+      // Replace "other" in cuisines with the custom value
+      const finalCuisines = selectedCuisines.map((c) =>
+        c === "other" && customCuisine.trim() ? customCuisine.trim() : c
+      ).filter((c) => c !== "other"); // Remove "other" if no custom value provided
+
       const res = await fetch("/api/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -224,23 +259,42 @@ export default function BecomeHostPage() {
           description: bio || null,
           phoneNumber: phoneValue || null,
           city: city || "Wrocław",
-          neighborhood: neighborhood || null,
-          cuisineSpecialties: selectedCuisines,
+          cuisineSpecialties: finalCuisines,
         }),
       });
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.message || "Failed to create host profile");
+        console.error("Become host API error:", res.status, errorData);
+        if (res.status === 401) {
+          alert(errorData.error || "Sesja wygasła. Zostaniesz przekierowany do logowania.");
+          router.push("/login?callbackUrl=/become-host");
+          return;
+        }
+        throw new Error(errorData.details || errorData.error || errorData.message || "Failed to create host profile");
       }
 
       router.push("/become-host/success");
     } catch (error) {
       console.error("Become host error:", error);
-      alert("Wystąpił błąd. Spróbuj ponownie.");
+      alert(`Wystąpił błąd: ${error instanceof Error ? error.message : "Spróbuj ponownie."}`);
       setIsSubmitting(false);
     }
   };
+
+  // Show loading while checking session
+  if (sessionStatus === "loading") {
+    return (
+      <div className="min-h-screen bg-muted/30 py-8 flex items-center justify-center">
+        <p className="text-muted-foreground">Ładowanie...</p>
+      </div>
+    );
+  }
+
+  // Don't render form if not authenticated (redirect happening)
+  if (sessionStatus === "unauthenticated") {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-muted/30 py-8">
@@ -399,17 +453,6 @@ export default function BecomeHostPage() {
                           onChange={(e) => setLastName(e.target.value)}
                         />
                       </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="email">{t("personalInfo.email")} *</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="jan@example.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                      />
                     </div>
 
                     <div className="space-y-2">
@@ -593,22 +636,6 @@ export default function BecomeHostPage() {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="neighborhood">{t("address.neighborhood")} *</Label>
-                  <Select value={neighborhood} onValueChange={setNeighborhood}>
-                    <SelectTrigger>
-                      <SelectValue placeholder={t("address.neighborhoodPlaceholder")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {neighborhoodKeys.map((key) => (
-                        <SelectItem key={key} value={key}>
-                          {t(`address.neighborhoods.${key}`)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800">
                   <p>
                     <strong>{t("address.notice").split(":")[0]}:</strong>
@@ -692,6 +719,18 @@ export default function BecomeHostPage() {
                       </Badge>
                     ))}
                   </div>
+                  {selectedCuisines.includes("other") && (
+                    <div className="mt-3 space-y-2">
+                      <Label htmlFor="customCuisine">Jaka kuchnia?</Label>
+                      <Input
+                        id="customCuisine"
+                        placeholder="Wpisz typ kuchni, np. etiopska, gruzińska..."
+                        value={customCuisine}
+                        onChange={(e) => setCustomCuisine(e.target.value)}
+                        className="max-w-md"
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <Separator />
@@ -767,6 +806,12 @@ export default function BecomeHostPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
+                {uploadError && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700">
+                    {uploadError}
+                  </div>
+                )}
+
                 {/* Profile photo (Individual) */}
                 {hostType === "individual" && (
                   <div className="space-y-3">
@@ -774,14 +819,15 @@ export default function BecomeHostPage() {
                     <div className="flex items-center gap-4">
                       <div
                         className={cn(
-                          "w-24 h-24 rounded-full border-2 border-dashed flex items-center justify-center",
+                          "w-24 h-24 rounded-full border-2 border-dashed flex items-center justify-center overflow-hidden",
                           profilePhoto
-                            ? "border-green-500 bg-green-50"
+                            ? "border-green-500"
                             : "border-muted-foreground/30"
                         )}
                       >
-                        {profilePhoto ? (
-                          <CheckCircle className="h-8 w-8 text-green-500" />
+                        {profilePhotoPreview ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={profilePhotoPreview} alt="Podgląd" className="w-full h-full object-cover" />
                         ) : (
                           <User className="h-8 w-8 text-muted-foreground/50" />
                         )}
@@ -790,14 +836,13 @@ export default function BecomeHostPage() {
                         <Button
                           type="button"
                           variant="outline"
-                          onClick={() => simulatePhotoUpload("profile")}
-                          disabled={profilePhoto !== null}
+                          onClick={() => handleFileSelect("profile")}
                         >
                           <Upload className="h-4 w-4 mr-2" />
                           {profilePhoto ? t("photos.changePhoto") : t("photos.addPhoto")}
                         </Button>
                         <p className="text-xs text-muted-foreground mt-2">
-                          {t("photos.photoHint")}
+                          {t("photos.photoHint")} (max 2 MB)
                         </p>
                       </div>
                     </div>
@@ -811,14 +856,15 @@ export default function BecomeHostPage() {
                     <div className="flex items-center gap-4">
                       <div
                         className={cn(
-                          "w-24 h-24 rounded-xl border-2 border-dashed flex items-center justify-center",
+                          "w-24 h-24 rounded-xl border-2 border-dashed flex items-center justify-center overflow-hidden",
                           logo
-                            ? "border-green-500 bg-green-50"
+                            ? "border-green-500"
                             : "border-muted-foreground/30"
                         )}
                       >
-                        {logo ? (
-                          <CheckCircle className="h-8 w-8 text-green-500" />
+                        {logoPreview ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={logoPreview} alt="Logo" className="w-full h-full object-cover" />
                         ) : (
                           <Building2 className="h-8 w-8 text-muted-foreground/50" />
                         )}
@@ -827,14 +873,13 @@ export default function BecomeHostPage() {
                         <Button
                           type="button"
                           variant="outline"
-                          onClick={() => simulatePhotoUpload("logo")}
-                          disabled={logo !== null}
+                          onClick={() => handleFileSelect("logo")}
                         >
                           <Upload className="h-4 w-4 mr-2" />
                           {logo ? t("photos.changeLogo") : t("photos.addLogo")}
                         </Button>
                         <p className="text-xs text-muted-foreground mt-2">
-                          {t("photos.logoHint")}
+                          {t("photos.logoHint")} (max 2 MB)
                         </p>
                       </div>
                     </div>
@@ -856,17 +901,20 @@ export default function BecomeHostPage() {
                     </span>
                   </div>
                   <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
-                    {foodPhotos.map((photo, index) => (
+                    {foodPhotoPreviews.map((preview, index) => (
                       <div
                         key={index}
-                        className="aspect-square rounded-lg border-2 border-green-500 bg-green-50 flex items-center justify-center relative"
+                        className="aspect-square rounded-lg border-2 border-green-500 overflow-hidden relative"
                       >
-                        <CheckCircle className="h-6 w-6 text-green-500" />
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={preview} alt={`Zdjęcie ${index + 1}`} className="w-full h-full object-cover" />
                         <button
                           type="button"
-                          onClick={() =>
-                            setFoodPhotos(foodPhotos.filter((_, i) => i !== index))
-                          }
+                          onClick={() => {
+                            URL.revokeObjectURL(preview);
+                            setFoodPhotos(foodPhotos.filter((_, i) => i !== index));
+                            setFoodPhotoPreviews(foodPhotoPreviews.filter((_, i) => i !== index));
+                          }}
                           className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center"
                         >
                           <X className="h-3 w-3 text-white" />
@@ -876,7 +924,7 @@ export default function BecomeHostPage() {
                     {foodPhotos.length < 5 && (
                       <button
                         type="button"
-                        onClick={() => simulatePhotoUpload("food")}
+                        onClick={() => handleFileSelect("food")}
                         className="aspect-square rounded-lg border-2 border-dashed border-muted-foreground/30 flex flex-col items-center justify-center hover:border-amber-500 hover:bg-amber-50 transition-colors"
                       >
                         <Upload className="h-6 w-6 text-muted-foreground/50 mb-1" />

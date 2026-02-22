@@ -1,23 +1,11 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useState, useEffect } from "react";
 import { Link } from "@/i18n/navigation";
 import { format } from "date-fns";
 import { pl } from "date-fns/locale";
-import {
-  getHostApplicationById,
-  hostApplicationStatusLabels,
-} from "@/lib/mock-data";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,31 +17,136 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { CheckCircle, Clock, ArrowLeft } from "lucide-react";
 
-export default function HostApplicationDetailPage({
+interface HostDetail {
+  id: string;
+  userId: string;
+  businessName: string;
+  description: string | null;
+  city: string;
+  neighborhood: string | null;
+  phoneNumber: string | null;
+  verified: boolean;
+  cuisineSpecialties: string[];
+  responseRate: number;
+  responseTime: number;
+  avatarUrl: string | null;
+  createdAt: string;
+  user: {
+    id: string;
+    email: string;
+    status: string;
+    createdAt: string;
+    guestProfile: { firstName: string; lastName: string } | null;
+  };
+  events: {
+    id: string;
+    title: string;
+    status: string;
+    date: string;
+    price: number;
+    capacity: number;
+    spotsLeft: number;
+    locationPublic: string;
+    _count: { bookings: number };
+  }[];
+  eventsCount: number;
+  publishedEvents: number;
+  totalBookings: number;
+  totalRevenue: number;
+}
+
+const statusColors: Record<string, string> = {
+  PUBLISHED: "bg-green-100 text-green-700",
+  DRAFT: "bg-stone-100 text-stone-700",
+  PENDING_REVIEW: "bg-yellow-100 text-yellow-700",
+  CANCELLED: "bg-red-100 text-red-700",
+  COMPLETED: "bg-blue-100 text-blue-700",
+};
+
+const statusLabels: Record<string, string> = {
+  PUBLISHED: "Opublikowane",
+  DRAFT: "Szkic",
+  PENDING_REVIEW: "Do akceptacji",
+  CANCELLED: "Anulowane",
+  COMPLETED: "Zakończone",
+};
+
+function formatPrice(grosze: number): string {
+  return `${(grosze / 100).toFixed(2)} zł`;
+}
+
+export default function HostDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const application = getHostApplicationById(id);
-
-  const [adminNotes, setAdminNotes] = useState(application?.adminNotes || "");
-  const [interviewDate, setInterviewDate] = useState<Date | undefined>(
-    application?.interviewDate
-  );
+  const [host, setHost] = useState<HostDetail | null>(null);
+  const [loading, setLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!application) {
+  const fetchHost = async () => {
+    try {
+      const res = await fetch(`/api/admin/hosts/${id}`);
+      if (res.ok) {
+        const data = await res.json();
+        setHost(data.host);
+      } else {
+        setError("Nie znaleziono hosta");
+      }
+    } catch {
+      setError("Błąd ładowania danych");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchHost();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+
+  const handleVerifyToggle = async (verified: boolean) => {
+    setIsProcessing(true);
+    try {
+      const res = await fetch(`/api/admin/hosts/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ verified }),
+      });
+      if (res.ok) {
+        await fetchHost();
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  if (loading) {
     return (
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-5xl mx-auto">
+        <Card className="p-8 text-center">
+          <p className="text-stone-500">Ładowanie...</p>
+        </Card>
+      </div>
+    );
+  }
+
+  if (error || !host) {
+    return (
+      <div className="max-w-5xl mx-auto">
         <Card className="p-8 text-center">
           <span className="text-6xl mb-4 block">🔍</span>
           <h1 className="text-xl font-bold text-stone-900 mb-2">
-            Nie znaleziono aplikacji
+            Nie znaleziono hosta
           </h1>
           <p className="text-stone-500 mb-6">
-            Aplikacja o podanym ID nie istnieje
+            {error || "Host o podanym ID nie istnieje"}
           </p>
           <Link href="/admin/hosts">
             <Button>Wróć do listy</Button>
@@ -63,27 +156,9 @@ export default function HostApplicationDetailPage({
     );
   }
 
-  const handleApprove = async () => {
-    setIsProcessing(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    alert("Aplikacja zaakceptowana! (demo)");
-    setIsProcessing(false);
-  };
-
-  const handleReject = async () => {
-    setIsProcessing(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    alert("Aplikacja odrzucona! (demo)");
-    setIsProcessing(false);
-  };
-
-  const handleScheduleInterview = async () => {
-    if (!interviewDate) return;
-    setIsProcessing(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    alert(`Rozmowa umówiona na ${format(interviewDate, "d MMMM yyyy HH:mm", { locale: pl })}! (demo)`);
-    setIsProcessing(false);
-  };
+  const hostName = host.user.guestProfile
+    ? `${host.user.guestProfile.firstName} ${host.user.guestProfile.lastName}`
+    : host.businessName;
 
   return (
     <div className="max-w-5xl mx-auto">
@@ -92,62 +167,74 @@ export default function HostApplicationDetailPage({
         <div className="flex items-center gap-4">
           <Link href="/admin/hosts">
             <Button variant="ghost" size="sm">
-              ← Wróć
+              <ArrowLeft className="h-4 w-4 mr-1" />
+              Wróć
             </Button>
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-stone-900">
-              Aplikacja: {application.firstName} {application.lastName}
-            </h1>
-            <p className="text-stone-500">ID: {application.id}</p>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-bold text-stone-900">
+                {host.businessName}
+              </h1>
+              {host.verified ? (
+                <CheckCircle className="h-6 w-6 text-green-600" />
+              ) : (
+                <Clock className="h-6 w-6 text-yellow-600" />
+              )}
+            </div>
+            <p className="text-stone-500">{host.user.email}</p>
           </div>
         </div>
         <span
           className={`px-4 py-2 rounded-full text-sm font-medium ${
-            hostApplicationStatusLabels[application.status].color
+            host.verified
+              ? "bg-green-100 text-green-700"
+              : "bg-yellow-100 text-yellow-700"
           }`}
         >
-          {hostApplicationStatusLabels[application.status].label}
+          {host.verified ? "✅ Zweryfikowany" : "⏳ Oczekuje na weryfikację"}
         </span>
       </div>
 
       <div className="grid md:grid-cols-3 gap-6">
         {/* Main Content */}
         <div className="md:col-span-2 space-y-6">
-          {/* Personal Info */}
+          {/* Host Info */}
           <Card>
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
-                <span>👤</span> Dane osobowe
+                <span>👤</span> Informacje o hoście
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-6">
                 <div>
                   <p className="text-xs text-stone-400 uppercase tracking-wide">
-                    Imię i nazwisko
+                    Nazwa biznesowa
                   </p>
                   <p className="text-stone-900 font-medium">
-                    {application.firstName} {application.lastName}
+                    {host.businessName}
                   </p>
+                </div>
+                <div>
+                  <p className="text-xs text-stone-400 uppercase tracking-wide">
+                    Imię i nazwisko
+                  </p>
+                  <p className="text-stone-900">{hostName}</p>
                 </div>
                 <div>
                   <p className="text-xs text-stone-400 uppercase tracking-wide">
                     Email
                   </p>
-                  <p className="text-stone-900">{application.email}</p>
+                  <p className="text-stone-900">{host.user.email}</p>
                 </div>
                 <div>
                   <p className="text-xs text-stone-400 uppercase tracking-wide">
                     Telefon
                   </p>
-                  <p className="text-stone-900">{application.phone}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-stone-400 uppercase tracking-wide">
-                    Miasto
+                  <p className="text-stone-900">
+                    {host.phoneNumber || "Nie podano"}
                   </p>
-                  <p className="text-stone-900">{application.city}</p>
                 </div>
               </div>
             </CardContent>
@@ -164,123 +251,105 @@ export default function HostApplicationDetailPage({
               <div className="grid grid-cols-2 gap-6">
                 <div>
                   <p className="text-xs text-stone-400 uppercase tracking-wide">
-                    Dzielnica
+                    Miasto
                   </p>
-                  <p className="text-stone-900">{application.neighborhood}</p>
+                  <p className="text-stone-900">{host.city}</p>
                 </div>
                 <div>
                   <p className="text-xs text-stone-400 uppercase tracking-wide">
-                    Pełny adres
+                    Dzielnica
                   </p>
-                  <p className="text-stone-900">{application.address}</p>
+                  <p className="text-stone-900">
+                    {host.neighborhood || "Nie podano"}
+                  </p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Experience & Cuisine */}
+          {/* Cuisine & Description */}
           <Card>
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
-                <span>👨‍🍳</span> Doświadczenie i kuchnia
+                <span>👨‍🍳</span> Kuchnia i opis
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div>
-                <p className="text-xs text-stone-400 uppercase tracking-wide mb-2">
-                  Poziom doświadczenia
-                </p>
-                <span
-                  className={`px-3 py-1.5 rounded-full text-sm ${
-                    application.experience === "experienced"
-                      ? "bg-green-100 text-green-700"
-                      : application.experience === "some"
-                      ? "bg-yellow-100 text-yellow-700"
-                      : "bg-stone-100 text-stone-700"
-                  }`}
-                >
-                  {application.experience === "none" && "Brak doświadczenia"}
-                  {application.experience === "some" && "Podstawowe doświadczenie"}
-                  {application.experience === "experienced" && "Doświadczony"}
-                </span>
-              </div>
+              {host.cuisineSpecialties.length > 0 && (
+                <div>
+                  <p className="text-xs text-stone-400 uppercase tracking-wide mb-2">
+                    Specjalizacje kulinarne
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {host.cuisineSpecialties.map((cuisine) => (
+                      <span
+                        key={cuisine}
+                        className="px-3 py-1.5 bg-amber-50 text-amber-700 rounded-full text-sm"
+                      >
+                        {cuisine}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div>
                 <p className="text-xs text-stone-400 uppercase tracking-wide mb-2">
-                  Typy kuchni
+                  Opis
                 </p>
-                <div className="flex flex-wrap gap-2">
-                  {application.cuisineTypes.map((cuisine) => (
-                    <span
-                      key={cuisine}
-                      className="px-3 py-1.5 bg-amber-50 text-amber-700 rounded-full text-sm"
-                    >
-                      {cuisine}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <p className="text-xs text-stone-400 uppercase tracking-wide mb-2">
-                  Planowane typy wydarzeń
+                <p className="text-stone-700 whitespace-pre-wrap">
+                  {host.description || "Brak opisu"}
                 </p>
-                <div className="flex flex-wrap gap-2">
-                  {application.eventTypes.map((type) => (
-                    <span
-                      key={type}
-                      className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-full text-sm"
-                    >
-                      {type === "supper-club" && "Supper Club"}
-                      {type === "warsztaty" && "Warsztaty"}
-                      {type === "degustacje" && "Degustacje"}
-                      {type === "popup" && "Pop-up"}
-                    </span>
-                  ))}
-                </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Bio */}
+          {/* Events */}
           <Card>
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
-                <span>📝</span> O sobie
+                <span>🎉</span> Wydarzenia ({host.eventsCount})
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-stone-700 whitespace-pre-wrap">
-                {application.bio}
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Photos */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <span>📸</span> Zdjęcia
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {application.photos.length === 0 ? (
+              {host.events.length === 0 ? (
                 <p className="text-stone-500 text-center py-4">
-                  Brak załączonych zdjęć
+                  Brak wydarzeń
                 </p>
               ) : (
-                <div className="grid grid-cols-3 gap-3">
-                  {application.photos.map((photo, index) => (
-                    <div
-                      key={index}
-                      className="aspect-square bg-stone-200 rounded-lg"
+                <div className="space-y-3">
+                  {host.events.map((event) => (
+                    <Link
+                      key={event.id}
+                      href={`/admin/events/${event.id}`}
+                      className="block"
                     >
-                      <img
-                        src={photo}
-                        alt=""
-                        className="w-full h-full object-cover rounded-lg"
-                      />
-                    </div>
+                      <div className="flex items-center justify-between p-3 rounded-lg bg-stone-50 hover:bg-stone-100 transition-colors">
+                        <div>
+                          <p className="font-medium text-stone-900">
+                            {event.title}
+                          </p>
+                          <p className="text-sm text-stone-500">
+                            {format(new Date(event.date), "d MMM yyyy, HH:mm", {
+                              locale: pl,
+                            })}{" "}
+                            · {event.locationPublic}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-sm text-stone-600">
+                            {event._count.bookings} rezerwacji
+                          </span>
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              statusColors[event.status] || "bg-stone-100 text-stone-700"
+                            }`}
+                          >
+                            {statusLabels[event.status] || event.status}
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
                   ))}
                 </div>
               )}
@@ -288,141 +357,66 @@ export default function HostApplicationDetailPage({
           </Card>
         </div>
 
-        {/* Sidebar - Actions */}
+        {/* Sidebar */}
         <div className="space-y-6">
-          {/* Status & Dates */}
+          {/* Stats */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">📋 Status</CardTitle>
+              <CardTitle className="text-lg">📊 Statystyki</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
                 <p className="text-xs text-stone-400 uppercase tracking-wide">
-                  Data złożenia
+                  Wszystkie wydarzenia
+                </p>
+                <p className="text-2xl font-bold text-stone-900">
+                  {host.eventsCount}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-stone-400 uppercase tracking-wide">
+                  Aktywne wydarzenia
+                </p>
+                <p className="text-2xl font-bold text-green-600">
+                  {host.publishedEvents}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-stone-400 uppercase tracking-wide">
+                  Łączne rezerwacje
+                </p>
+                <p className="text-2xl font-bold text-stone-900">
+                  {host.totalBookings}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-stone-400 uppercase tracking-wide">
+                  Łączny przychód
+                </p>
+                <p className="text-2xl font-bold text-amber-600">
+                  {formatPrice(host.totalRevenue)}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-stone-400 uppercase tracking-wide">
+                  Data rejestracji
                 </p>
                 <p className="text-stone-900">
-                  {format(application.submittedAt, "d MMMM yyyy, HH:mm", {
+                  {format(new Date(host.createdAt), "d MMMM yyyy", {
                     locale: pl,
                   })}
                 </p>
               </div>
-
-              {application.reviewedAt && (
-                <div>
-                  <p className="text-xs text-stone-400 uppercase tracking-wide">
-                    Data rozpatrzenia
-                  </p>
-                  <p className="text-stone-900">
-                    {format(application.reviewedAt, "d MMMM yyyy, HH:mm", {
-                      locale: pl,
-                    })}
-                  </p>
-                </div>
-              )}
-
-              {application.interviewDate && (
-                <div className="p-3 bg-blue-50 rounded-lg">
-                  <p className="text-xs text-blue-600 uppercase tracking-wide">
-                    Rozmowa umówiona
-                  </p>
-                  <p className="text-blue-900 font-medium">
-                    {format(application.interviewDate, "d MMMM yyyy, HH:mm", {
-                      locale: pl,
-                    })}
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Admin Notes */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">📝 Notatki admina</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Textarea
-                value={adminNotes}
-                onChange={(e) => setAdminNotes(e.target.value)}
-                placeholder="Dodaj notatki dotyczące aplikacji..."
-                rows={4}
-              />
-              <Button className="w-full mt-3" variant="outline" size="sm">
-                Zapisz notatkę
-              </Button>
             </CardContent>
           </Card>
 
           {/* Actions */}
-          {application.status === "pending" && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">⚡ Akcje</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {/* Schedule Interview */}
-                <div className="space-y-2">
-                  <Label>Umów rozmowę weryfikacyjną</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start">
-                        {interviewDate
-                          ? format(interviewDate, "d MMMM yyyy", { locale: pl })
-                          : "Wybierz datę"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={interviewDate}
-                        onSelect={setInterviewDate}
-                        disabled={(date) => date < new Date()}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <Button
-                    className="w-full bg-blue-600 hover:bg-blue-700"
-                    onClick={handleScheduleInterview}
-                    disabled={!interviewDate || isProcessing}
-                  >
-                    📅 Umów rozmowę
-                  </Button>
-                </div>
-
-                <hr className="my-4" />
-
-                {/* Approve */}
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      className="w-full bg-green-600 hover:bg-green-700"
-                      disabled={isProcessing}
-                    >
-                      ✅ Akceptuj aplikację
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Zaakceptować aplikację?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        {application.firstName} {application.lastName} otrzyma
-                        status hosta i będzie mógł tworzyć wydarzenia na
-                        platformie.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Anuluj</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={handleApprove}
-                        className="bg-green-600 hover:bg-green-700"
-                      >
-                        Tak, akceptuj
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-
-                {/* Reject */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">⚡ Akcje</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {host.verified ? (
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <Button
@@ -430,32 +424,66 @@ export default function HostApplicationDetailPage({
                       variant="destructive"
                       disabled={isProcessing}
                     >
-                      ❌ Odrzuć aplikację
+                      ❌ Cofnij weryfikację
                     </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
-                      <AlertDialogTitle>Odrzucić aplikację?</AlertDialogTitle>
+                      <AlertDialogTitle>Cofnąć weryfikację?</AlertDialogTitle>
                       <AlertDialogDescription>
-                        Aplikacja {application.firstName} {application.lastName}{" "}
-                        zostanie odrzucona. Upewnij się, że dodałeś notatkę z
-                        powodem odrzucenia.
+                        {host.businessName} straci status zweryfikowanego hosta.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel>Anuluj</AlertDialogCancel>
                       <AlertDialogAction
-                        onClick={handleReject}
+                        onClick={() => handleVerifyToggle(false)}
                         className="bg-red-600 hover:bg-red-700"
                       >
-                        Tak, odrzuć
+                        Tak, cofnij
                       </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
-              </CardContent>
-            </Card>
-          )}
+              ) : (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      className="w-full bg-green-600 hover:bg-green-700"
+                      disabled={isProcessing}
+                    >
+                      ✅ Zweryfikuj hosta
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Zweryfikować hosta?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        {host.businessName} otrzyma status zweryfikowanego hosta
+                        i będzie mógł tworzyć wydarzenia. Zostanie wysłany email
+                        z potwierdzeniem.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Anuluj</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => handleVerifyToggle(true)}
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        Tak, zweryfikuj
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
+
+              <Link href={`/admin/users/${host.userId}`}>
+                <Button className="w-full" variant="outline">
+                  👤 Profil użytkownika
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
 
           {/* Contact */}
           <Card>
@@ -464,17 +492,19 @@ export default function HostApplicationDetailPage({
             </CardHeader>
             <CardContent className="space-y-3">
               <a
-                href={`mailto:${application.email}`}
+                href={`mailto:${host.user.email}`}
                 className="flex items-center gap-2 text-sm text-blue-600 hover:underline"
               >
-                ✉️ Wyślij email
+                ✉️ {host.user.email}
               </a>
-              <a
-                href={`tel:${application.phone}`}
-                className="flex items-center gap-2 text-sm text-blue-600 hover:underline"
-              >
-                📱 Zadzwoń
-              </a>
+              {host.phoneNumber && (
+                <a
+                  href={`tel:${host.phoneNumber}`}
+                  className="flex items-center gap-2 text-sm text-blue-600 hover:underline"
+                >
+                  📱 {host.phoneNumber}
+                </a>
+              )}
             </CardContent>
           </Card>
         </div>

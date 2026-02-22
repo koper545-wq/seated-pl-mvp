@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAuth } from "@/lib/api/auth";
 import { serverError } from "@/lib/api/errors";
+import { notifyHostApplicationReceived } from "@/lib/email";
 
 // GET /api/profile — get current user's profile
 export async function GET() {
@@ -87,25 +88,30 @@ export async function PATCH(request: NextRequest) {
       });
     } else if (becomeHost && businessName) {
       // Create new host profile for existing guest user
-      await db.$transaction(async (tx) => {
-        await tx.hostProfile.create({
-          data: {
-            userId: result.user.id,
-            businessName,
-            description: description || null,
-            phoneNumber: phoneNumber || null,
-            city: city || "Wrocław",
-            neighborhood: neighborhood || null,
-            cuisineSpecialties: cuisineSpecialties || [],
-            avatarUrl: avatarUrl || null,
-          },
-        });
-
-        await tx.user.update({
-          where: { id: result.user.id },
-          data: { userType: "HOST" },
-        });
+      const newHostProfile = await db.hostProfile.create({
+        data: {
+          userId: result.user.id,
+          businessName,
+          description: description || null,
+          phoneNumber: phoneNumber || null,
+          city: city || "Wrocław",
+          neighborhood: neighborhood || null,
+          cuisineSpecialties: cuisineSpecialties || [],
+          avatarUrl: avatarUrl || null,
+        },
       });
+
+      await db.user.update({
+        where: { id: result.user.id },
+        data: { userType: "HOST" },
+      });
+
+      // Send host application confirmation email (fire-and-forget)
+      notifyHostApplicationReceived({
+        hostEmail: result.user.email,
+        hostName: businessName,
+        applicationId: newHostProfile.id,
+      }).catch(console.error);
     }
 
     // Return updated profile
@@ -117,6 +123,11 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json(updatedUser);
   } catch (error) {
     console.error("PATCH /api/profile error:", error);
-    return serverError();
+    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error("PATCH /api/profile full error:", JSON.stringify(error, Object.getOwnPropertyNames(error as object)));
+    return NextResponse.json(
+      { error: "Wystąpił błąd serwera", details: message },
+      { status: 500 }
+    );
   }
 }
