@@ -35,6 +35,12 @@ interface UserProfile {
     neighborhood: string | null;
     cuisineSpecialties: string[];
     verified: boolean;
+    address?: {
+      street?: string;
+      apartment?: string;
+      postalCode?: string;
+      city?: string;
+    } | null;
   } | null;
 }
 

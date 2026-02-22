@@ -54,7 +54,7 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { pl } from "date-fns/locale";
 import { eventLanguages } from "@/lib/mock-data";
-import { useMockUser } from "@/components/dev/account-switcher";
+import { useCurrentUser } from "@/hooks/use-current-user";
 import { useEvents } from "@/contexts/events-context";
 
 const eventTypes = [
@@ -104,8 +104,11 @@ export default function CreateEventPage() {
   const intlRouter = useIntlRouter();
   const searchParams = useSearchParams();
   const duplicateFromId = searchParams.get("duplicate");
-  const { user: mockUser, isLoading, effectiveRole } = useMockUser();
+  const { user, isLoading, effectiveRole, isMockUser, hostProfile, userId } = useCurrentUser();
   const { addEvent, getEventById } = useEvents();
+  const [profileAddress, setProfileAddress] = useState<string>("");
+  const [profileCity, setProfileCity] = useState<string>("");
+  const [submitError, setSubmitError] = useState<string>("");
 
   // ALL HOOKS MUST BE BEFORE CONDITIONAL RETURNS
   const [step, setStep] = useState(1);
@@ -159,6 +162,26 @@ export default function CreateEventPage() {
     });
   }, [isRecurring, eventDate, recurrencePattern, endCondition, recurrenceEndDate, recurrenceCount]);
 
+  // Load address from host profile for pre-fill
+  useEffect(() => {
+    if (isMockUser || isLoading) return;
+    fetch("/api/host/onboarding")
+      .then((res) => res.ok ? res.json() : null)
+      .then((data) => {
+        if (data?.hostProfile) {
+          const addr = data.hostProfile.address as { street?: string; apartment?: string; postalCode?: string; city?: string } | null;
+          if (addr) {
+            const parts = [addr.street, addr.apartment, addr.postalCode, addr.city].filter(Boolean);
+            setProfileAddress(parts.join(", "));
+            setProfileCity(addr.city || data.hostProfile.city || "");
+          } else if (data.hostProfile.city) {
+            setProfileCity(data.hostProfile.city);
+          }
+        }
+      })
+      .catch(() => {});
+  }, [isMockUser, isLoading]);
+
   // Redirect to guest dashboard if in guest mode
   useEffect(() => {
     if (!isLoading && effectiveRole === "guest") {
@@ -208,7 +231,7 @@ export default function CreateEventPage() {
     eventDate !== undefined &&
     startTime !== "" &&
     duration > 0 &&
-    (useDefaultAddress || customAddress.length >= 10);
+    (profileAddress ? (useDefaultAddress || customAddress.length >= 10) : customAddress.length >= 10);
 
   const isStep3Valid = capacity >= 2 && capacity <= 50 && price >= 50;
 
@@ -249,54 +272,102 @@ export default function CreateEventPage() {
 
   const handleSubmit = async (asDraft: boolean = false) => {
     setIsSubmitting(true);
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    setSubmitError("");
 
-    const hostId = mockUser?.id || "host-1";
-
-    // For recurring events, use all generated dates; otherwise just the single date
     const datesToCreate = isRecurring ? generatedDates : [eventDate || new Date()];
+    const eventAddress = useDefaultAddress ? (profileAddress || customAddress) : customAddress;
+    const eventCity = profileCity || "Wrocław";
 
-    const eventAddress = useDefaultAddress ? "ul. Ruska 46/3, Wrocław" : customAddress;
+    if (isMockUser) {
+      // Mock user flow — save to localStorage context
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      const hostId = (user as { id?: string })?.id || "host-1";
 
-    // Create an event for each date
-    for (const date of datesToCreate) {
-      const slug = title.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "") + "-" + Date.now();
-
-      addEvent(hostId, {
-        title,
-        slug,
-        type: eventTypes.find((t) => t.value === eventType)?.label || eventType,
-        typeSlug: eventType,
-        date,
-        dateFormatted: format(date, "d MMM yyyy, HH:mm", { locale: pl }),
-        startTime,
-        duration,
-        location: "Wrocław",
-        locationSlug: "wroclaw",
-        fullAddress: eventAddress,
-        coordinates: { lat: 51.1079, lng: 17.0385 }, // Default Wrocław center
-        price,
-        capacity,
-        spotsLeft: capacity,
-        bookingsCount: 0,
-        pendingBookings: 0,
-        confirmedGuests: 0,
-        revenue: 0,
-        imageGradient: "from-amber-400 to-orange-500",
-        status: asDraft ? "draft" : "pending_review",
-        description,
-        menuDescription,
-        dietaryOptions: selectedDietary,
-        createdAt: new Date(),
-      });
+      for (const date of datesToCreate) {
+        const slug = title.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "") + "-" + Date.now();
+        addEvent(hostId, {
+          title,
+          slug,
+          type: eventTypes.find((t) => t.value === eventType)?.label || eventType,
+          typeSlug: eventType,
+          date,
+          dateFormatted: format(date, "d MMM yyyy, HH:mm", { locale: pl }),
+          startTime,
+          duration,
+          location: eventCity,
+          locationSlug: eventCity.toLowerCase(),
+          fullAddress: eventAddress,
+          coordinates: { lat: 51.1079, lng: 17.0385 },
+          price,
+          capacity,
+          spotsLeft: capacity,
+          bookingsCount: 0,
+          pendingBookings: 0,
+          confirmedGuests: 0,
+          revenue: 0,
+          imageGradient: "from-amber-400 to-orange-500",
+          status: asDraft ? "draft" : "pending_review",
+          description,
+          menuDescription,
+          dietaryOptions: selectedDietary,
+          createdAt: new Date(),
+        });
+      }
+      router.push("/dashboard/host?created=true");
+      return;
     }
 
-    // Show message if multiple events created
-    if (datesToCreate.length > 1) {
-      console.log(`Utworzono ${datesToCreate.length} wydarzeń!`);
-    }
+    // Real user flow — POST to API
+    try {
+      for (const date of datesToCreate) {
+        const res = await fetch("/api/events", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title,
+            description,
+            eventType: ({
+              "supper-club": "SUPPER_CLUB",
+              "chefs-table": "CHEFS_TABLE",
+              "warsztaty": "COOKING_CLASS",
+              "degustacje": "WINE_TASTING",
+              "popup": "POPUP",
+              "active-food": "ACTIVE_FOOD",
+              "farm": "FARM_EXPERIENCE",
+            } as Record<string, string>)[eventType] || "OTHER",
+            cuisineTags: selectedTags,
+            images: photos,
+            date: date.toISOString(),
+            startTime,
+            duration,
+            locationPublic: eventCity,
+            locationFull: eventAddress,
+            price: price * 100, // PLN → grosze
+            capacity,
+            menuDescription,
+            dietaryOptions: selectedDietary,
+            byob,
+            whatToBring: whatToBring || null,
+            bookingMode: instantBooking ? "INSTANT" : "MANUAL",
+            status: asDraft ? "DRAFT" : "DRAFT", // Always draft, admin reviews
+          }),
+        });
 
-    router.push("/dashboard/host?created=true");
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.error || `Błąd serwera (${res.status})`);
+        }
+      }
+
+      if (datesToCreate.length > 1) {
+        console.log(`Utworzono ${datesToCreate.length} wydarzeń!`);
+      }
+
+      router.push("/dashboard/host?created=true");
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : "Wystąpił nieoczekiwany błąd");
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -747,20 +818,34 @@ export default function CreateEventPage() {
                 <Separator />
 
                 <div className="space-y-4">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="defaultAddress"
-                      checked={useDefaultAddress}
-                      onCheckedChange={(checked) =>
-                        setUseDefaultAddress(checked as boolean)
-                      }
-                    />
-                    <label htmlFor="defaultAddress" className="text-sm cursor-pointer">
-                      Użyj mojego domyślnego adresu (ul. Ruska 46/3)
-                    </label>
-                  </div>
+                  {profileAddress ? (
+                    <>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="defaultAddress"
+                          checked={useDefaultAddress}
+                          onCheckedChange={(checked) =>
+                            setUseDefaultAddress(checked as boolean)
+                          }
+                        />
+                        <label htmlFor="defaultAddress" className="text-sm cursor-pointer">
+                          Użyj adresu z profilu ({profileAddress})
+                        </label>
+                      </div>
 
-                  {!useDefaultAddress && (
+                      {!useDefaultAddress && (
+                        <div className="space-y-2">
+                          <Label htmlFor="address">Adres wydarzenia *</Label>
+                          <Input
+                            id="address"
+                            placeholder="ul. Przykładowa 12, 50-000 Wrocław"
+                            value={customAddress}
+                            onChange={(e) => setCustomAddress(e.target.value)}
+                          />
+                        </div>
+                      )}
+                    </>
+                  ) : (
                     <div className="space-y-2">
                       <Label htmlFor="address">Adres wydarzenia *</Label>
                       <Input
@@ -769,6 +854,9 @@ export default function CreateEventPage() {
                         value={customAddress}
                         onChange={(e) => setCustomAddress(e.target.value)}
                       />
+                      <p className="text-xs text-muted-foreground">
+                        Podaj pełny adres, pod którym odbędzie się wydarzenie
+                      </p>
                     </div>
                   )}
                 </div>
@@ -994,6 +1082,13 @@ export default function CreateEventPage() {
                 </div>
               </CardContent>
             </Card>
+          )}
+
+          {/* Error message */}
+          {submitError && (
+            <div className="mt-4 bg-red-50 border border-red-200 rounded-lg p-3">
+              <p className="text-sm text-red-700">{submitError}</p>
+            </div>
           )}
 
           {/* Navigation */}
