@@ -387,7 +387,7 @@ export default function EventsPage() {
               </h3>
               <Select value={location} onValueChange={setLocation}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Wybierz dzielnicę" />
+                  <SelectValue placeholder="Wybierz lokalizację" />
                 </SelectTrigger>
                 <SelectContent>
                   {neighborhoods.map((neighborhood) => (

@@ -257,7 +257,7 @@ export default function HostDetailPage({
                 </div>
                 <div>
                   <p className="text-xs text-stone-400 uppercase tracking-wide">
-                    Dzielnica
+                    Lokalizacja
                   </p>
                   <p className="text-stone-900">
                     {host.neighborhood || "Nie podano"}

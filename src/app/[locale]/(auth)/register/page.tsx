@@ -19,7 +19,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Loader2, ChefHat, User, MapPin, Phone } from "lucide-react";
+import { Loader2, ChefHat, User, Phone } from "lucide-react";
 import { GoogleIcon, FacebookIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
@@ -67,7 +67,7 @@ export default function RegisterPage() {
   // Host fields
   const [businessName, setBusinessName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [city, setCity] = useState("Wroclaw");
+  const [city] = useState("Wroclaw");
   const [selectedCuisines, setSelectedCuisines] = useState<string[]>([]);
   const [description, setDescription] = useState("");
 
@@ -313,37 +313,21 @@ export default function RegisterPage() {
                 />
               </div>
 
-              {/* Phone & City */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="phoneNumber">
-                    <Phone className="inline h-3.5 w-3.5 mr-1" />
-                    Telefon *
-                  </Label>
-                  <Input
-                    id="phoneNumber"
-                    type="tel"
-                    placeholder="+48 123 456 789"
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    disabled={isDisabled}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="city">
-                    <MapPin className="inline h-3.5 w-3.5 mr-1" />
-                    Miasto *
-                  </Label>
-                  <Input
-                    id="city"
-                    placeholder="Wroclaw"
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    disabled={isDisabled}
-                    required
-                  />
-                </div>
+              {/* Phone */}
+              <div className="space-y-2">
+                <Label htmlFor="phoneNumber">
+                  <Phone className="inline h-3.5 w-3.5 mr-1" />
+                  Telefon *
+                </Label>
+                <Input
+                  id="phoneNumber"
+                  type="tel"
+                  placeholder="+48 123 456 789"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  disabled={isDisabled}
+                  required
+                />
               </div>
 
               {/* Cuisine specialties */}

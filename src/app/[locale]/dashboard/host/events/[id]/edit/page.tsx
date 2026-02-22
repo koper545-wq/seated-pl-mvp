@@ -394,7 +394,7 @@ export default function EditEventPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Dzielnica (widoczna publicznie)</Label>
+                  <Label>Lokalizacja (widoczna publicznie)</Label>
                   <Select value={neighborhood} onValueChange={setNeighborhood}>
                     <SelectTrigger>
                       <SelectValue />
