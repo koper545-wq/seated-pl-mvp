@@ -303,6 +303,25 @@ export async function notifyEmailVerification(data: {
 }
 
 // ============================================
+// PASSWORD RESET
+// ============================================
+
+/**
+ * Send password reset link
+ */
+export async function notifyPasswordReset(data: {
+  email: string;
+  resetUrl: string;
+}) {
+  return sendEmail({
+    to: data.email,
+    template: templates.passwordReset({
+      resetUrl: data.resetUrl,
+    }),
+  });
+}
+
+// ============================================
 // WAITLIST EMAIL NOTIFICATIONS
 // ============================================
 

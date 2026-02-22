@@ -1574,3 +1574,73 @@ Ten email został wysłany automatycznie przez platformę Seated.
     `,
   };
 }
+
+/**
+ * Password reset email
+ */
+export function passwordReset(data: {
+  resetUrl: string;
+}): EmailTemplate {
+  return {
+    subject: `Resetowanie hasła - Seated`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #1c1917; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #d97706; margin: 0;">🍽️ Seated</h1>
+          </div>
+
+          <div style="background: #fef3c7; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+            <h2 style="margin: 0 0 10px 0; color: #92400e;">🔑 Resetowanie hasła</h2>
+            <p style="margin: 0; color: #78716c;">Otrzymaliśmy prośbę o zmianę hasła do Twojego konta.</p>
+          </div>
+
+          <p>Cześć! 👋</p>
+
+          <p>Kliknij poniższy przycisk, aby ustawić nowe hasło:</p>
+
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${data.resetUrl}" style="display: inline-block; background: #d97706; color: white; padding: 15px 40px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px;">Ustaw nowe hasło</a>
+          </div>
+
+          <p style="color: #78716c; font-size: 14px;">Lub skopiuj i wklej ten link do przeglądarki:</p>
+          <p style="color: #78716c; font-size: 12px; word-break: break-all;">${data.resetUrl}</p>
+
+          <div style="background: #fef3c7; border-radius: 12px; padding: 15px; margin: 20px 0;">
+            <p style="margin: 0; color: #92400e; font-size: 14px;">
+              <strong>⏰ Link wygasa za 1 godzinę.</strong><br>
+              Jeśli nie prosiłeś/aś o reset hasła, zignoruj tego emaila — Twoje hasło pozostanie bez zmian.
+            </p>
+          </div>
+
+          <hr style="border: none; border-top: 1px solid #e7e5e4; margin: 30px 0;">
+
+          <p style="color: #a8a29e; font-size: 12px; text-align: center;">
+            Ten email został wysłany automatycznie przez platformę Seated.<br>
+            © ${new Date().getFullYear()} Seated. Wszystkie prawa zastrzeżone.
+          </p>
+        </body>
+      </html>
+    `,
+    text: `
+Cześć!
+
+🔑 RESETOWANIE HASŁA
+
+Otrzymaliśmy prośbę o zmianę hasła do Twojego konta na Seated. Kliknij poniższy link, aby ustawić nowe hasło:
+
+${data.resetUrl}
+
+⏰ Link wygasa za 1 godzinę.
+Jeśli nie prosiłeś/aś o reset hasła, zignoruj tego emaila.
+
+---
+Ten email został wysłany automatycznie przez platformę Seated.
+    `,
+  };
+}
