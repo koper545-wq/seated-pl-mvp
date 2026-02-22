@@ -120,7 +120,7 @@ export async function PATCH(
       notifyHostApplicationApproved({
         hostEmail: host.user.email,
         hostName: host.businessName,
-        dashboardLink: `${process.env.NEXTAUTH_URL || "https://seated-pl-mvp.vercel.app"}/host/dashboard`,
+        dashboardLink: `${process.env.NEXTAUTH_URL || "https://seated-pl-mvp.vercel.app"}/dashboard/host`,
       }).catch(console.error);
     }
 
