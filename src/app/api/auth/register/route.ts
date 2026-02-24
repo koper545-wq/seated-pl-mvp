@@ -12,6 +12,9 @@ export async function POST(request: Request) {
       email, password, userType, firstName, lastName,
       businessName, phoneNumber, city, cuisineSpecialties, description,
       ageVerified, hostSubtype,
+      // Extended host onboarding fields
+      experienceLevel, experienceDetails, eventTypes,
+      address, nip, website, contactPerson,
     } = body;
 
     // Validation
@@ -72,6 +75,14 @@ export async function POST(request: Request) {
           cuisineSpecialties: Array.isArray(cuisineSpecialties) ? cuisineSpecialties : [],
           description: description || null,
           hostSubtype: hostSubtype || null,
+          experienceLevel: experienceLevel || null,
+          experienceDetails: experienceDetails || null,
+          eventTypes: Array.isArray(eventTypes) ? eventTypes : [],
+          address: address || null,
+          nip: nip || null,
+          website: website || null,
+          contactPerson: contactPerson || null,
+          onboardingCompleted: true,
         },
       });
     } else {
