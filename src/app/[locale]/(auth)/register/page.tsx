@@ -147,10 +147,11 @@ export default function RegisterPage() {
   const isHostStep1Valid = () => {
     if (!email || !password || password.length < 8 || password !== confirmPassword) return false;
     if (!ageVerified || !termsAccepted) return false;
-    if (!phoneNumber || phoneNumber.length < 9) return false;
     if (hostSubtype === "business") {
+      if (!contactPhone || contactPhone.length < 9) return false;
       return businessName.trim().length >= 2;
     } else {
+      if (!phoneNumber || phoneNumber.length < 9) return false;
       return hostFirstName.trim().length >= 2 && hostLastName.trim().length >= 2;
     }
   };
