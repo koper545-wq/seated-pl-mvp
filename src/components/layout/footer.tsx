@@ -11,6 +11,7 @@ export function Footer() {
     platform: [
       { name: tNav("events"), href: "/events" },
       { name: tNav("howItWorks"), href: "/how-it-works" },
+      { name: tNav("whyJoin"), href: "/why-join" },
       { name: t("rewards"), href: "/rewards" },
       { name: tNav("becomeHost"), href: "/become-host" },
       { name: tNav("faq"), href: "/faq" },
