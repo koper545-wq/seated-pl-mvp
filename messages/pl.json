@@ -144,6 +144,9 @@
       "guests": "zadowolonych gości",
       "hosts": "aktywnych hostów",
       "rating": "średnia ocena"
+    },
+    "partners": {
+      "title": "Zaufali nam"
     }
   },
   "events": {

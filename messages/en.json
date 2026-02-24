@@ -144,6 +144,9 @@
       "guests": "happy guests",
       "hosts": "active hosts",
       "rating": "average rating"
+    },
+    "partners": {
+      "title": "Trusted by"
     }
   },
   "events": {

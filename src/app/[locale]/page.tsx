@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EventCard } from "@/components/events";
 import { FAQSection } from "@/components/faq-section";
+import { PartnersMarquee } from "@/components/partners-marquee";
 import { getTranslations } from "next-intl/server";
 import { db } from "@/lib/db";
 import { EventStatus } from "@prisma/client";
@@ -420,6 +421,9 @@ export default async function Home() {
           </p>
         </div>
       </section>
+
+      {/* Partners / Trusted By */}
+      <PartnersMarquee title={t("partners.title")} />
     </div>
   );
 }
