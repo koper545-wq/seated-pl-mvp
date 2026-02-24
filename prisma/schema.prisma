@@ -101,6 +101,7 @@ model HostProfile {
   experienceLevel     String?  @map("experience_level") // "yes" | "no" | "professional"
   experienceDetails   String?  @map("experience_details")
   eventTypes          String[] @map("event_types")
+  verificationAppointment Json? @map("verification_appointment") // { date, timeSlot }
   createdAt           DateTime @default(now()) @map("created_at")
   updatedAt           DateTime @updatedAt @map("updated_at")
 

@@ -12,7 +12,6 @@ import {
   guestLevels,
   getBookingsByGuestId,
   bookingStatusLabels,
-  guestWrittenReviews,
   getGuestProfileByMockUserId,
 } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
@@ -46,6 +45,16 @@ export default function GuestDashboardPage() {
       locationPublic?: string;
     };
   }> | null>(null);
+  const [apiReviews, setApiReviews] = useState<Array<{
+    id: string;
+    overallRating: number;
+    text: string | null;
+    event: {
+      id: string;
+      title: string;
+      host: { businessName: string | null };
+    };
+  }> | null>(null);
 
   // Redirect to host dashboard if in host mode
   useEffect(() => {
@@ -61,6 +70,17 @@ export default function GuestDashboardPage() {
       .then((res) => res.ok ? res.json() : null)
       .then((data) => {
         if (data?.bookings) setApiBookings(data.bookings);
+      })
+      .catch(console.error);
+  }, [isMockUser, isLoading, effectiveRole]);
+
+  // Fetch reviews from API for real users
+  useEffect(() => {
+    if (isMockUser || isLoading || effectiveRole === "host") return;
+    fetch("/api/reviews")
+      .then((res) => res.ok ? res.json() : null)
+      .then((data) => {
+        if (data?.reviews) setApiReviews(data.reviews);
       })
       .catch(console.error);
   }, [isMockUser, isLoading, effectiveRole]);
@@ -95,7 +115,7 @@ export default function GuestDashboardPage() {
         xp: guestProfile?.xp || 0,
         dietaryRestrictions: guestProfile?.dietaryRestrictions || [],
         eventsAttended: 0,
-        reviewsWritten: 0,
+        reviewsWritten: apiReviews?.length || 0,
       };
 
   const badges = getGuestBadges(profile.badges);
@@ -342,21 +362,21 @@ export default function GuestDashboardPage() {
         )}
 
         {/* Recent Reviews */}
-        {guestWrittenReviews.length > 0 && (
+        {apiReviews && apiReviews.length > 0 && (
           <section className="mb-6">
             <h2 className="font-semibold text-stone-900 mb-3">
               Twoje ostatnie opinie
             </h2>
             <div className="space-y-3">
-              {guestWrittenReviews.slice(0, 2).map((review) => (
+              {apiReviews.slice(0, 2).map((review) => (
                 <Card key={review.id} className="p-4">
                   <div className="flex items-start justify-between mb-2">
                     <div>
                       <p className="font-medium text-stone-900 text-sm">
-                        {review.eventTitle}
+                        {review.event.title}
                       </p>
                       <p className="text-xs text-stone-500">
-                        u {review.hostName}
+                        u {review.event.host.businessName || "Host"}
                       </p>
                     </div>
                     <div className="flex items-center gap-1">
@@ -366,9 +386,11 @@ export default function GuestDashboardPage() {
                       </span>
                     </div>
                   </div>
-                  <p className="text-sm text-stone-600 line-clamp-2">
-                    {review.text}
-                  </p>
+                  {review.text && (
+                    <p className="text-sm text-stone-600 line-clamp-2">
+                      {review.text}
+                    </p>
+                  )}
                 </Card>
               ))}
             </div>

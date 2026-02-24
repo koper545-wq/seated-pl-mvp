@@ -13,6 +13,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
+import { Calendar } from "@/components/ui/calendar";
+import { pl } from "date-fns/locale";
 import {
   Card,
   CardContent,
@@ -32,6 +34,8 @@ import {
   ArrowRight,
   ArrowLeft,
   CheckCircle,
+  CalendarDays,
+  Clock,
 } from "lucide-react";
 import { GoogleIcon, FacebookIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
@@ -106,6 +110,7 @@ export default function RegisterPage() {
   const [hasExperience, setHasExperience] = useState<string>("");
   const [experienceDetails, setExperienceDetails] = useState("");
   const [description, setDescription] = useState("");
+  const [customCuisine, setCustomCuisine] = useState("");
 
   // Host fields — Step 3: Address
   const [street, setStreet] = useState("");
@@ -119,10 +124,17 @@ export default function RegisterPage() {
   const [contactEmail, setContactEmail] = useState("");
   const [contactPhone, setContactPhone] = useState("");
 
+  // Verification appointment
+  const [verificationDate, setVerificationDate] = useState<Date | undefined>(undefined);
+  const [verificationTimeSlot, setVerificationTimeSlot] = useState("");
+
   const handleCuisineToggle = (value: string) => {
     setSelectedCuisines((prev) =>
       prev.includes(value) ? prev.filter((c) => c !== value) : [...prev, value]
     );
+    if (value === "other") {
+      setCustomCuisine("");
+    }
   };
 
   const handleEventTypeToggle = (value: string) => {
@@ -197,7 +209,9 @@ export default function RegisterPage() {
           businessName: finalBusinessName,
           phoneNumber: userType === "HOST" ? phoneNumber : undefined,
           city: userType === "HOST" ? city : undefined,
-          cuisineSpecialties: userType === "HOST" ? selectedCuisines : undefined,
+          cuisineSpecialties: userType === "HOST"
+            ? selectedCuisines.map((c) => c === "other" && customCuisine.trim() ? customCuisine.trim() : c).filter(Boolean)
+            : undefined,
           description: userType === "HOST" && description.trim() ? description : undefined,
           hostSubtype: userType === "HOST" ? hostSubtype : undefined,
           ageVerified,
@@ -214,6 +228,10 @@ export default function RegisterPage() {
           contactPerson:
             userType === "HOST" && hostSubtype === "business"
               ? { name: contactPersonName, email: contactEmail, phone: contactPhone }
+              : undefined,
+          verificationAppointment:
+            userType === "HOST" && verificationDate && verificationTimeSlot
+              ? { date: verificationDate.toISOString(), timeSlot: verificationTimeSlot }
               : undefined,
         }),
       });
@@ -859,6 +877,17 @@ export default function RegisterPage() {
                     </Badge>
                   ))}
                 </div>
+
+                {selectedCuisines.includes("other") && (
+                  <div className="space-y-2 mt-2">
+                    <Label>Jaka kuchnia?</Label>
+                    <Input
+                      placeholder="np. peruwiańska, etiopska, gruzińska..."
+                      value={customCuisine}
+                      onChange={(e) => setCustomCuisine(e.target.value)}
+                    />
+                  </div>
+                )}
               </div>
 
               <Separator />
@@ -985,6 +1014,92 @@ export default function RegisterPage() {
             </CardContent>
           </Card>
 
+          {/* Verification Appointment */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <CalendarDays className="h-4 w-4 text-amber-600" />
+                Termin weryfikacji
+              </CardTitle>
+              <CardDescription>
+                Wybierz preferowany termin krótkiej rozmowy weryfikacyjnej (ok. 15 min).
+                Skontaktujemy się, żeby potwierdzić szczegóły.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1">
+                  <Label className="mb-2 block">Wybierz dzień</Label>
+                  <div className="border rounded-lg p-2 inline-block">
+                    <Calendar
+                      mode="single"
+                      selected={verificationDate}
+                      onSelect={setVerificationDate}
+                      locale={pl}
+                      disabled={(date) => {
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        const day = date.getDay();
+                        // Disable past dates, weekends
+                        return date < today || day === 0 || day === 6;
+                      }}
+                      fromDate={new Date()}
+                      className="rounded-md"
+                    />
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <Label className="mb-2 block">Przedział godzinowy</Label>
+                  <div className="space-y-2">
+                    {[
+                      { value: "morning", label: "Rano", time: "9:00 – 12:00", icon: "🌅" },
+                      { value: "afternoon", label: "Popołudnie", time: "12:00 – 16:00", icon: "☀️" },
+                      { value: "evening", label: "Wieczór", time: "16:00 – 19:00", icon: "🌆" },
+                    ].map((slot) => (
+                      <button
+                        key={slot.value}
+                        type="button"
+                        onClick={() => setVerificationTimeSlot(slot.value)}
+                        className={cn(
+                          "w-full flex items-center gap-3 p-3 rounded-lg border-2 transition-all text-left",
+                          verificationTimeSlot === slot.value
+                            ? "border-amber-500 bg-amber-50 text-amber-900"
+                            : "border-stone-200 hover:border-stone-300 text-stone-600"
+                        )}
+                      >
+                        <span className="text-lg">{slot.icon}</span>
+                        <div>
+                          <p className="font-medium text-sm">{slot.label}</p>
+                          <p className="text-xs opacity-75 flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {slot.time}
+                          </p>
+                        </div>
+                        {verificationTimeSlot === slot.value && (
+                          <CheckCircle className="h-4 w-4 text-amber-600 ml-auto" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              {verificationDate && verificationTimeSlot && (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800">
+                  <strong>Wybrany termin:</strong>{" "}
+                  {verificationDate.toLocaleDateString("pl-PL", {
+                    weekday: "long",
+                    day: "numeric",
+                    month: "long",
+                  })}
+                  {", "}
+                  {verificationTimeSlot === "morning" && "9:00 – 12:00"}
+                  {verificationTimeSlot === "afternoon" && "12:00 – 16:00"}
+                  {verificationTimeSlot === "evening" && "16:00 – 19:00"}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           {/* Summary */}
           <Card>
             <CardHeader className="pb-3">
@@ -1007,7 +1122,10 @@ export default function RegisterPage() {
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Kuchnia</span>
                 <span className="font-medium">
-                  {selectedCuisines.map((c) => cuisineOptions.find((o) => o.value === c)?.label).join(", ")}
+                  {selectedCuisines.map((c) => {
+                    if (c === "other" && customCuisine.trim()) return customCuisine.trim();
+                    return cuisineOptions.find((o) => o.value === c)?.label;
+                  }).join(", ")}
                 </span>
               </div>
               <div className="flex justify-between">
@@ -1016,6 +1134,22 @@ export default function RegisterPage() {
                   {selectedEventTypes.map((e) => eventTypeOptions.find((o) => o.value === e)?.label).join(", ")}
                 </span>
               </div>
+
+              {verificationDate && verificationTimeSlot && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Weryfikacja</span>
+                  <span className="font-medium">
+                    {verificationDate.toLocaleDateString("pl-PL", {
+                      day: "numeric",
+                      month: "long",
+                    })}
+                    {", "}
+                    {verificationTimeSlot === "morning" && "9:00–12:00"}
+                    {verificationTimeSlot === "afternoon" && "12:00–16:00"}
+                    {verificationTimeSlot === "evening" && "16:00–19:00"}
+                  </span>
+                </div>
+              )}
 
               <div className="bg-green-50 border border-green-200 rounded-lg p-3 mt-4 text-sm text-green-800">
                 <p className="font-medium mb-1">Co dalej?</p>

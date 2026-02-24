@@ -3,6 +3,34 @@ import { db } from "@/lib/db";
 import { requireAuth } from "@/lib/api/auth";
 import { badRequest, forbidden, serverError } from "@/lib/api/errors";
 
+// GET /api/reviews — get current user's reviews
+export async function GET() {
+  try {
+    const result = await requireAuth();
+    if (result.error) return result.error;
+
+    const reviews = await db.review.findMany({
+      where: { authorId: result.user.id, isHostReview: false },
+      include: {
+        event: {
+          select: {
+            id: true,
+            title: true,
+            host: { select: { businessName: true } },
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+    });
+
+    return NextResponse.json({ reviews });
+  } catch (error) {
+    console.error("GET /api/reviews error:", error);
+    return serverError();
+  }
+}
+
 // POST /api/reviews — create a review
 export async function POST(request: NextRequest) {
   try {

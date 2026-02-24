@@ -10,8 +10,9 @@ import { BadgeDisplay } from "@/components/badges";
 import { ReviewsSection } from "@/components/reviews";
 import { WaitlistDialog } from "@/components/waitlist";
 import { WhosGoingSection } from "@/components/whos-going";
-import { getReviewsByHostId, getQuestionsByEventId } from "@/lib/mock-data";
+import { getQuestionsByEventId } from "@/lib/mock-data";
 import { getEventDetail, getPublishedEvents } from "@/lib/dal/events";
+import { db } from "@/lib/db";
 import {
   Calendar,
   Clock,
@@ -44,8 +45,46 @@ export default async function EventPage({ params }: EventPageProps) {
     .filter((e) => e.id !== event.id)
     .slice(0, 3);
 
-  // Get reviews for this host
-  const hostReviews = getReviewsByHostId(event.host.id);
+  // Get reviews for this host from database
+  const dbReviews = await db.review.findMany({
+    where: {
+      event: { hostId: event.host.id },
+      isHostReview: false,
+    },
+    include: {
+      event: { select: { title: true } },
+      author: {
+        select: {
+          id: true,
+          guestProfile: { select: { firstName: true, lastName: true, avatarUrl: true } },
+        },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+    take: 20,
+  });
+
+  const hostReviews = dbReviews.map((r) => ({
+    id: r.id,
+    eventId: r.eventId,
+    eventTitle: r.event.title,
+    authorId: r.authorId,
+    authorName: [r.author.guestProfile?.firstName, r.author.guestProfile?.lastName].filter(Boolean).join(" ") || "Gość",
+    authorAvatar: r.author.guestProfile?.avatarUrl || undefined,
+    hostId: event.host.id,
+    overallRating: r.overallRating,
+    foodRating: r.foodRating || 0,
+    communicationRating: r.communicationRating || 0,
+    valueRating: r.valueRating || 0,
+    ambianceRating: r.ambianceRating || 0,
+    text: r.text || "",
+    photos: r.photos || [],
+    verifiedAttendee: r.verifiedAttendee,
+    helpfulCount: r.helpfulCount,
+    response: r.response || undefined,
+    respondedAt: r.respondedAt || undefined,
+    createdAt: r.createdAt,
+  }));
 
   // Get Q&A for this event
   const eventQuestions = getQuestionsByEventId(event.id);

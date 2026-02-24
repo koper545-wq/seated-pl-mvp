@@ -67,6 +67,7 @@ export function useCurrentUser(): CurrentUserState {
   const [apiProfile, setApiProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [profileFetched, setProfileFetched] = useState(false);
+  const [profileLoaded, setProfileLoaded] = useState(false);
 
   // 1. Check for mock user in localStorage (dev mode)
   useEffect(() => {
@@ -129,7 +130,8 @@ export function useCurrentUser(): CurrentUserState {
           }
         }
       })
-      .catch(console.error);
+      .catch(console.error)
+      .finally(() => setProfileLoaded(true));
   }, [mockUser, session, status, profileFetched]);
 
   const switchMode = useCallback((mode: ActiveMode) => {
@@ -183,10 +185,13 @@ export function useCurrentUser(): CurrentUserState {
     hostProfile: null,
   } : null);
 
+  // Still loading if we have a session but profile hasn't finished loading
+  const profileStillLoading = !!session?.user?.id && !profileLoaded;
+
   return {
     user,
     activeMode,
-    isLoading: isLoading || status === "loading",
+    isLoading: isLoading || status === "loading" || profileStillLoading,
     canSwitchMode,
     switchMode,
     effectiveRole,

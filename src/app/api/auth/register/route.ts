@@ -14,7 +14,7 @@ export async function POST(request: Request) {
       ageVerified, hostSubtype,
       // Extended host onboarding fields
       experienceLevel, experienceDetails, eventTypes,
-      address, nip, website, contactPerson,
+      address, nip, website, contactPerson, verificationAppointment,
     } = body;
 
     // Validation
@@ -82,6 +82,7 @@ export async function POST(request: Request) {
           nip: nip || null,
           website: website || null,
           contactPerson: contactPerson || null,
+          verificationAppointment: verificationAppointment || null,
           onboardingCompleted: true,
         },
       });
