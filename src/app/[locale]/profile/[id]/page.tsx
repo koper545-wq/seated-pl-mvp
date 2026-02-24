@@ -1,16 +1,13 @@
-"use client";
-
-import { use } from "react";
 import { Link } from "@/i18n/navigation";
 import { format } from "date-fns";
 import { pl } from "date-fns/locale";
+import { db } from "@/lib/db";
 import {
   currentGuestProfile,
   getGuestBadges,
   getGuestLevel,
   getXPProgress,
   guestLevels,
-  guestWrittenReviews,
 } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -23,12 +20,12 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-export default function PublicProfilePage({
+export default async function PublicProfilePage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = use(params);
+  const { id } = await params;
 
   // In real app, fetch profile by ID
   // For demo, use current profile
@@ -36,6 +33,21 @@ export default function PublicProfilePage({
   const badges = getGuestBadges(profile.badges);
   const levelInfo = getGuestLevel(profile.xp);
   const xpProgress = getXPProgress(profile.xp, guestLevels);
+
+  // Fetch real reviews written by this user from database
+  const reviews = await db.review.findMany({
+    where: { authorId: id, isHostReview: false },
+    include: {
+      event: {
+        select: {
+          id: true,
+          title: true,
+          host: { select: { businessName: true } },
+        },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+  });
 
   // Check if profile is public
   if (!profile.isPublic) {
@@ -213,7 +225,7 @@ export default function PublicProfilePage({
               Wydarzenia ({profile.attendedEvents.length})
             </TabsTrigger>
             <TabsTrigger value="reviews" className="flex-1">
-              Opinie ({guestWrittenReviews.length})
+              Opinie ({reviews.length})
             </TabsTrigger>
           </TabsList>
 
@@ -262,21 +274,21 @@ export default function PublicProfilePage({
 
           <TabsContent value="reviews">
             <div className="space-y-3">
-              {guestWrittenReviews.length === 0 ? (
+              {reviews.length === 0 ? (
                 <Card className="p-8 text-center">
                   <span className="text-4xl mb-2 block">⭐</span>
                   <p className="text-stone-500">Brak napisanych opinii</p>
                 </Card>
               ) : (
-                guestWrittenReviews.map((review) => (
+                reviews.map((review) => (
                   <Card key={review.id} className="p-4">
                     <div className="flex items-start justify-between mb-2">
                       <div>
                         <p className="font-medium text-stone-900">
-                          {review.eventTitle}
+                          {review.event.title}
                         </p>
                         <p className="text-sm text-stone-500">
-                          u {review.hostName}
+                          u {review.event.host.businessName}
                         </p>
                       </div>
                       <div className="flex items-center gap-1 bg-amber-50 px-2 py-1 rounded-full">
@@ -286,7 +298,9 @@ export default function PublicProfilePage({
                         </span>
                       </div>
                     </div>
-                    <p className="text-stone-600">{review.text}</p>
+                    {review.text && (
+                      <p className="text-stone-600">{review.text}</p>
+                    )}
                     <p className="text-xs text-stone-400 mt-2">
                       {format(review.createdAt, "d MMMM yyyy", { locale: pl })}
                     </p>
