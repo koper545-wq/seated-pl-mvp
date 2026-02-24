@@ -123,6 +123,8 @@ export default function RegisterPage() {
   const [contactPersonName, setContactPersonName] = useState("");
   const [contactEmail, setContactEmail] = useState("");
   const [contactPhone, setContactPhone] = useState("");
+  const [contactPhonePrefix, setContactPhonePrefix] = useState("+48");
+  const [phonePrefix, setPhonePrefix] = useState("+48");
 
   // Verification appointment
   const [verificationDate, setVerificationDate] = useState<Date | undefined>(undefined);
@@ -148,10 +150,12 @@ export default function RegisterPage() {
     if (!email || !password || password.length < 8 || password !== confirmPassword) return false;
     if (!ageVerified || !termsAccepted) return false;
     if (hostSubtype === "business") {
-      if (!contactPhone || contactPhone.length < 9) return false;
+      const digits = contactPhone.replace(/\s/g, "");
+      if (digits.length < 9) return false;
       return businessName.trim().length >= 2;
     } else {
-      if (!phoneNumber || phoneNumber.length < 9) return false;
+      const digits = phoneNumber.replace(/\s/g, "");
+      if (digits.length < 9) return false;
       return hostFirstName.trim().length >= 2 && hostLastName.trim().length >= 2;
     }
   };
@@ -208,7 +212,9 @@ export default function RegisterPage() {
           firstName: userType === "GUEST" ? firstName : undefined,
           lastName: userType === "GUEST" ? lastName : undefined,
           businessName: finalBusinessName,
-          phoneNumber: userType === "HOST" ? phoneNumber : undefined,
+          phoneNumber: userType === "HOST"
+            ? (hostSubtype === "business" ? `${contactPhonePrefix} ${contactPhone}` : `${phonePrefix} ${phoneNumber}`)
+            : undefined,
           city: userType === "HOST" ? city : undefined,
           cuisineSpecialties: userType === "HOST"
             ? selectedCuisines.map((c) => c === "other" && customCuisine.trim() ? customCuisine.trim() : c).filter(Boolean)
@@ -228,7 +234,7 @@ export default function RegisterPage() {
           website: userType === "HOST" && hostSubtype === "business" ? website : undefined,
           contactPerson:
             userType === "HOST" && hostSubtype === "business"
-              ? { name: contactPersonName, email: contactEmail, phone: contactPhone }
+              ? { name: contactPersonName, email: contactEmail, phone: `${contactPhonePrefix} ${contactPhone}` }
               : undefined,
           verificationAppointment:
             userType === "HOST" && verificationDate && verificationTimeSlot
@@ -669,12 +675,21 @@ export default function RegisterPage() {
                     </div>
                     <div className="space-y-2">
                       <Label>Telefon *</Label>
-                      <Input
-                        type="tel"
-                        placeholder="+48 123 456 789"
-                        value={contactPhone}
-                        onChange={(e) => setContactPhone(e.target.value)}
-                      />
+                      <div className="flex gap-2">
+                        <Input
+                          value={contactPhonePrefix}
+                          onChange={(e) => setContactPhonePrefix(e.target.value)}
+                          className="w-20 text-center"
+                        />
+                        <Input
+                          type="tel"
+                          placeholder="123 456 789"
+                          value={contactPhone}
+                          onChange={(e) => setContactPhone(e.target.value.replace(/[^\d\s]/g, ""))}
+                          className="flex-1"
+                          maxLength={11}
+                        />
+                      </div>
                     </div>
                   </div>
                 </>
@@ -703,12 +718,21 @@ export default function RegisterPage() {
                       <Phone className="inline h-3.5 w-3.5 mr-1" />
                       Telefon *
                     </Label>
-                    <Input
-                      type="tel"
-                      placeholder="+48 123 456 789"
-                      value={phoneNumber}
-                      onChange={(e) => setPhoneNumber(e.target.value)}
-                    />
+                    <div className="flex gap-2">
+                      <Input
+                        value={phonePrefix}
+                        onChange={(e) => setPhonePrefix(e.target.value)}
+                        className="w-20 text-center"
+                      />
+                      <Input
+                        type="tel"
+                        placeholder="123 456 789"
+                        value={phoneNumber}
+                        onChange={(e) => setPhoneNumber(e.target.value.replace(/[^\d\s]/g, ""))}
+                        className="flex-1"
+                        maxLength={11}
+                      />
+                    </div>
                   </div>
                 </>
               )}
