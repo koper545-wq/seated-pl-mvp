@@ -22,11 +22,9 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import {
-  mockEvents as fallbackEvents,
   eventTypes,
   neighborhoods,
   sortOptions,
-  filterEvents,
   groupSizeOptions,
   languageOptions,
   experienceLevels,
@@ -49,15 +47,15 @@ const EventsMap = dynamic(
 );
 
 export default function EventsPage() {
-  // Events from API (with fallback to mock data)
-  const [apiEvents, setApiEvents] = useState<MockEvent[] | null>(null);
+  // Events from API
+  const [events, setEvents] = useState<MockEvent[]>([]);
+  const [eventsLoading, setEventsLoading] = useState(true);
 
   useEffect(() => {
     fetch("/api/events")
       .then((res) => res.json())
       .then((data) => {
-        if (data.events && data.events.length > 0) {
-          // Map API events to MockEvent format
+        if (data.events) {
           const mapped: MockEvent[] = data.events.map((e: Record<string, unknown>) => ({
             id: e.id,
             title: e.title,
@@ -96,15 +94,14 @@ export default function EventsPage() {
               verified: false,
             },
           }));
-          setApiEvents(mapped);
+          setEvents(mapped);
         }
       })
       .catch(() => {
-        // Silently fall back to mock data
-      });
+        setEvents([]);
+      })
+      .finally(() => setEventsLoading(false));
   }, []);
-
-  const mockEvents = apiEvents || fallbackEvents;
 
   // Filter states
   const [search, setSearch] = useState("");
@@ -124,22 +121,48 @@ export default function EventsPage() {
   // View mode: list or map
   const [viewMode, setViewMode] = useState<"list" | "map">("list");
 
-  // Filter events
+  // Filter events locally
   const filteredEvents = useMemo(() => {
-    return filterEvents({
-      type: eventType,
-      location: location,
-      minPrice: priceRange[0],
-      maxPrice: priceRange[1],
-      search: search,
-      sort: sortBy,
-      // Advanced filters
-      groupSize,
-      language,
-      experienceLevel,
-      accessibility: selectedAccessibility,
-    });
-  }, [search, eventType, location, priceRange, sortBy, groupSize, language, experienceLevel, selectedAccessibility]);
+    let filtered = [...events];
+
+    // Type filter
+    if (eventType !== "all") {
+      filtered = filtered.filter((e) => e.typeSlug === eventType);
+    }
+
+    // Location filter
+    if (location !== "all") {
+      filtered = filtered.filter((e) => e.locationSlug === location);
+    }
+
+    // Price filter
+    filtered = filtered.filter((e) => e.price >= priceRange[0] && e.price <= priceRange[1]);
+
+    // Search filter
+    if (search) {
+      const q = search.toLowerCase();
+      filtered = filtered.filter(
+        (e) =>
+          e.title.toLowerCase().includes(q) ||
+          e.description?.toLowerCase().includes(q) ||
+          e.host.name.toLowerCase().includes(q) ||
+          e.location.toLowerCase().includes(q)
+      );
+    }
+
+    // Sort
+    if (sortBy === "date-asc") {
+      filtered.sort((a, b) => a.date.getTime() - b.date.getTime());
+    } else if (sortBy === "date-desc") {
+      filtered.sort((a, b) => b.date.getTime() - a.date.getTime());
+    } else if (sortBy === "price-asc") {
+      filtered.sort((a, b) => a.price - b.price);
+    } else if (sortBy === "price-desc") {
+      filtered.sort((a, b) => b.price - a.price);
+    }
+
+    return filtered;
+  }, [events, search, eventType, location, priceRange, sortBy, groupSize, language, experienceLevel, selectedAccessibility]);
 
   // Count active filters
   const activeFiltersCount = useMemo(() => {
@@ -188,7 +211,7 @@ export default function EventsPage() {
             Odkryj wydarzenia
           </h1>
           <p className="text-muted-foreground">
-            {mockEvents.length} kulinarnych doświadczeń czeka na Ciebie
+            {eventsLoading ? "Ładowanie..." : `${events.length} kulinarnych doświadczeń czeka na Ciebie`}
           </p>
         </div>
       </div>
