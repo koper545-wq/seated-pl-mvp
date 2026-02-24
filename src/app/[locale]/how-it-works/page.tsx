@@ -98,7 +98,7 @@ export default async function HowItWorksPage() {
                 {t("hero.cta")}
               </Button>
             </Link>
-            <Link href="/become-host">
+            <Link href="/register?type=host">
               <Button size="lg" variant="outline">
                 {t("hero.ctaSecondary")}
               </Button>
@@ -217,7 +217,7 @@ export default async function HowItWorksPage() {
             {t("forHosts.subtitle")}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/become-host">
+            <Link href="/register?type=host">
               <Button
                 size="lg"
                 className="bg-amber-500 hover:bg-amber-600 text-stone-900"

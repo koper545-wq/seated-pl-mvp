@@ -38,7 +38,11 @@ export async function GET(request: NextRequest) {
       where: { id: verificationToken.id },
     });
 
-    return NextResponse.redirect(new URL("/login?verified=true", request.url));
+    // Redirect to login with email pre-filled for convenience
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("verified", "true");
+    loginUrl.searchParams.set("email", verificationToken.email);
+    return NextResponse.redirect(loginUrl);
   } catch (error) {
     console.error("Email verification error:", error);
     return NextResponse.redirect(new URL("/login?error=verification_failed", request.url));

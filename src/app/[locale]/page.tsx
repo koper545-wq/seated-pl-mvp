@@ -215,7 +215,7 @@ export default async function Home() {
                 className="text-base h-12 px-8"
                 asChild
               >
-                <Link href="/become-host">{t("hero.ctaSecondary")}</Link>
+                <Link href="/register?type=host">{t("hero.ctaSecondary")}</Link>
               </Button>
             </div>
             <p className="mt-6 text-sm text-muted-foreground">
@@ -289,7 +289,7 @@ export default async function Home() {
                   {t("featured.noEventsDescription")}
                 </p>
                 <Button asChild className="bg-amber-600 hover:bg-amber-700">
-                  <Link href="/become-host">{t("hero.ctaSecondary")}</Link>
+                  <Link href="/register?type=host">{t("hero.ctaSecondary")}</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -405,7 +405,7 @@ export default async function Home() {
               className="text-base h-12 px-8"
               asChild
             >
-              <Link href="/become-host">{t("cta.button")}</Link>
+              <Link href="/register?type=host">{t("cta.button")}</Link>
             </Button>
             <Button
               size="lg"

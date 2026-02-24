@@ -386,7 +386,7 @@ export default function GuestDashboardPage() {
               <p className="text-sm text-stone-600 mb-4">
                 Zostań hostem i zarabiaj dzieląc się swoją pasją do jedzenia
               </p>
-              <Link href="/become-host">
+              <Link href="/register?type=host">
                 <Button className="bg-amber-500 hover:bg-amber-600">
                   Zostań hostem
                 </Button>

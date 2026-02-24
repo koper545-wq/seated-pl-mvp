@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "@/i18n/navigation";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
@@ -47,9 +47,12 @@ const cuisineOptions = [
 
 export default function RegisterPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const t = useTranslations("auth");
 
-  const [userType, setUserType] = useState<UserType>("GUEST");
+  const [userType, setUserType] = useState<UserType>(
+    searchParams.get("type") === "host" ? "HOST" : "GUEST"
+  );
   const [hostSubtype, setHostSubtype] = useState<HostSubtype>("business");
 
   // Common fields

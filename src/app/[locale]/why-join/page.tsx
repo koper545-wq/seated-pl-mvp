@@ -660,7 +660,7 @@ function HostDeck() {
             wydarzenie może być już w przyszłym tygodniu.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/become-host">
+            <Link href="/register?type=host">
               <Button
                 size="lg"
                 className="bg-amber-500 hover:bg-amber-600 text-white font-semibold"
@@ -975,7 +975,7 @@ function RestaurantDeck() {
             Wypełnij formularz. Nasz zespół skontaktuje się w ciągu 48h.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/become-host">
+            <Link href="/register?type=host">
               <Button
                 size="lg"
                 variant="secondary"

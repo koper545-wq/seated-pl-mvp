@@ -27,8 +27,9 @@ function LoginForm() {
   const registered = searchParams.get("registered");
   const verified = searchParams.get("verified");
   const urlError = searchParams.get("error");
+  const prefillEmail = searchParams.get("email");
 
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(prefillEmail || "");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);

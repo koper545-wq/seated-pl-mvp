@@ -41,7 +41,7 @@ export function Header() {
     { name: t("events"), href: "/events", mvpHidden: false },
     { name: t("howItWorks"), href: "/how-it-works", mvpHidden: false },
     { name: t("whyJoin"), href: "/why-join", mvpHidden: false },
-    { name: t("becomeHost"), href: "/become-host", mvpHidden: true },
+    { name: t("becomeHost"), href: "/register?type=host", mvpHidden: true },
     { name: t("giftCards"), href: "/gift-cards", mvpHidden: true },
   ];
 

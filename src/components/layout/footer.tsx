@@ -13,7 +13,7 @@ export function Footer() {
       { name: tNav("howItWorks"), href: "/how-it-works" },
       { name: tNav("whyJoin"), href: "/why-join" },
       { name: t("rewards"), href: "/rewards" },
-      { name: tNav("becomeHost"), href: "/become-host" },
+      { name: tNav("becomeHost"), href: "/register?type=host" },
       { name: tNav("faq"), href: "/faq" },
     ],
     legal: [
